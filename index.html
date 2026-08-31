@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finora — Personal Finance</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#f5f7fb;color:#172033}
+button,input,select{font:inherit}button{cursor:pointer;border:0}
+.app{display:flex;min-height:100vh}.sidebar{width:245px;position:fixed;inset:0 auto 0 0;background:#111827;color:#fff;padding:25px 16px}
+.logo{font-size:27px;font-weight:800;padding:0 15px 28px}.logo span{color:#8b85ff}
+.nav-title{font-size:10px;color:#7d879a;letter-spacing:1.2px;text-transform:uppercase;padding:16px 14px 8px}
+.nav button{display:block;width:100%;padding:12px 14px;margin:4px 0;text-align:left;border-radius:10px;background:transparent;color:#b8c1d1}.nav button:hover,.nav button.active{background:#252d3d;color:white}
+.main{margin-left:245px;width:calc(100% - 245px);padding:27px 34px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.search{width:280px;padding:11px 14px;border:1px solid #e2e7f0;border-radius:10px;background:#fff;outline:0}.profile{display:flex;gap:11px;align-items:center}.avatar{width:40px;height:40px;border-radius:50%;background:#eeedff;color:#635bff;display:grid;place-items:center;font-weight:800}
+.page{display:none}.page.active{display:block}h1{font-size:28px;margin:0;letter-spacing:-.7px}.subtitle{margin:6px 0 0;color:#718096}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:25px 0}.card{background:#fff;border:1px solid #e3e8f0;border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(30,40,70,.06)}
+.metric-top{font-size:13px;color:#718096;display:flex;justify-content:space-between}.metric{font-size:26px;font-weight:800;margin:12px 0 7px}.positive{color:#16a36a}.negative{color:#e5484d}.muted{font-size:12px;color:#718096}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}.card h3{margin:0 0 17px;font-size:16px}.legend{font-size:12px;color:#718096;display:flex;gap:18px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#635bff;margin-right:5px}.dot.red{background:#e5484d}
+.chart{height:220px;display:flex;align-items:end;gap:13px;padding:20px 8px 0}.bar-group{height:100%;flex:1;display:flex;align-items:end;gap:4px}.bar{flex:1;border-radius:5px 5px 0 0;background:#c8c5ff}.bar.exp{background:#ffb7bb}
+.budget{margin-bottom:19px}.budget-head{display:flex;justify-content:space-between;font-size:13px}.progress{height:8px;background:#edf0f5;border-radius:10px;overflow:hidden;margin-top:9px}.progress i{display:block;height:100%;background:#635bff;border-radius:10px}
+.row{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid #e7ebf2;font-size:14px}.row:last-child{border-bottom:0}.pill{background:#f0f2f7;border-radius:20px;padding:6px 9px;font-size:11px;color:#667085}.income{color:#16a36a;font-weight:700}.expense{color:#e5484d;font-weight:700}
+.transactions{margin-top:18px}.table{background:#fff;border:1px solid #e3e8f0;border-radius:15px;padding:0 20px;box-shadow:0 10px 30px rgba(30,40,70,.06)}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:24px 0 15px}.filters{display:flex;gap:9px}.control{padding:10px;border:1px solid #e1e6ef;border-radius:9px;background:#fff}
+.btn{padding:11px 16px;border-radius:10px;background:#635bff;color:#fff;font-weight:700}.btn.secondary{background:#edf0f6;color:#30394a}.empty{text-align:center;padding:50px;color:#718096}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:10;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modal-box{width:480px;max-width:100%;background:#fff;border-radius:18px;padding:24px}.close{float:right;width:32px;height:32px;border-radius:50%;background:#eef1f5}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field label{display:block;font-size:12px;color:#718096;margin-bottom:6px}.field input,.field select{width:100%;padding:11px;border:1px solid #dfe5ee;border-radius:9px;outline:0}.full{grid-column:1/-1}.notice{padding:14px;background:#eeedff;color:#4c47a8;border-radius:12px;font-size:13px;margin-bottom:18px}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:700px){.sidebar{width:70px;padding:20px 9px}.logo{font-size:0;text-align:center}.logo:after{content:"F";font-size:26px;color:#8b85ff}.nav-title,.nav button span{display:none}.nav button{text-align:center}.main{margin-left:70px;width:calc(100% - 70px);padding:20px 14px}.search{width:160px}.profile{display:none}.cards{grid-template-columns:1fr 1fr}.row{grid-template-columns:1.5fr 1fr 1fr}.row>:last-child{display:none}}
+@media(max-width:480px){.cards{grid-template-columns:1fr}.toolbar{flex-direction:column;align-items:stretch}.filters{flex-direction:column}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="logo">Fin<span>ora</span></div>
+<div class="nav-title">Overview</div>
+<nav class="nav">
+<button class="active" data-page="dashboard">◉ <span>Dashboard</span></button>
+<button data-page="transactions">↔ <span>Transactions</span></button>
+<button data-page="budgets">▤ <span>Budgets</span></button>
+<button data-page="analytics">◒ <span>Analytics</span></button>
+<button data-page="goals">◇ <span>Savings Goals</span></button>
+<button data-page="accounts">▣ <span>Accounts</span></button>
+</nav>
+<div class="nav-title">Personal</div><nav class="nav"><button data-page="settings">⚙ <span>Settings</span></button></nav>
+</aside>
+<main class="main">
+<header class="top"><input id="globalSearch" class="search" placeholder="Search transactions..."><div class="profile"><div><b>Mahendra</b><div class="muted">Personal account</div></div><div class="avatar">M</div></div></header>
+
+<section id="dashboard" class="page active">
+<h1>Good evening, Mahendra 👋</h1><p class="subtitle">Here's your financial overview for August 2026.</p>
+<div class="cards">
+<div class="card"><div class="metric-top">Total Balance <span>↗</span></div><div class="metric" id="balance">₹1,84,500</div><div class="muted">Across all accounts</div></div>
+<div class="card"><div class="metric-top">Income <span>↑</span></div><div class="metric positive" id="income">₹75,000</div><div class="muted">This month</div></div>
+<div class="card"><div class="metric-top">Expenses <span>↓</span></div><div class="metric negative" id="expenses">₹42,350</div><div class="muted">This month</div></div>
+<div class="card"><div class="metric-top">Savings <span>◇</span></div><div class="metric" id="savings">₹32,650</div><div class="muted">43.5% of income</div></div>
+</div>
+<div class="grid2">
+<div class="card"><h3>Cash Flow</h3><div class="legend"><span><i class="dot"></i>Income</span><span><i class="dot red"></i>Expenses</span></div><div class="chart" id="flowChart"></div></div>
+<div class="card"><h3>Monthly Budget</h3>
+<div class="budget"><div class="budget-head"><b>Food</b><span>₹6,800 / ₹10,000</span></div><div class="progress"><i style="width:68%"></i></div></div>
+<div class="budget"><div class="budget-head"><b>Shopping</b><span>₹11,400 / ₹15,000</span></div><div class="progress"><i style="width:76%"></i></div></div>
+<div class="budget"><div class="budget-head"><b>Transport</b><span>₹3,200 / ₹5,000</span></div><div class="progress"><i style="width:64%"></i></div></div>
+<div class="budget"><div class="budget-head"><b>Entertainment</b><span>₹4,100 / ₹5,000</span></div><div class="progress"><i style="width:82%"></i></div></div>
+</div></div>
+<div class="card transactions"><h3>Recent Transactions</h3><div id="recentRows"></div></div>
+</section>
+
+<section id="transactions" class="page">
+<h1>Transactions</h1><p class="subtitle">Track every rupee coming in and going out.</p>
+<div class="toolbar"><button class="btn" onclick="openModal()">+ Add Transaction</button><div class="filters"><select class="control" id="typeFilter"><option>All Types</option><option>Income</option><option>Expense</option></select><select class="control" id="catFilter"><option>All Categories</option><option>Food</option><option>Shopping</option><option>Bills</option><option>Transport</option><option>Entertainment</option><option>Salary</option><option>Investment</option><option>Healthcare</option></select></div></div>
+<div class="table"><div class="row"><b>Transaction</b><b>Category</b><b>Date</b><b>Amount</b></div><div id="allRows"></div></div>
+</section>
+
+<section id="budgets" class="page"><h1>Budgets</h1><p class="subtitle">Stay ahead of your monthly spending limits.</p>
+<div class="cards"><div class="card"><div class="metric-top">Total Budget</div><div class="metric">₹35,000</div><div class="muted">August 2026</div></div><div class="card"><div class="metric-top">Spent</div><div class="metric negative">₹25,500</div><div class="muted">72.8% utilized</div></div><div class="card"><div class="metric-top">Remaining</div><div class="metric positive">₹9,500</div><div class="muted">Available to spend</div></div></div>
+<div class="card"><h3>Category Budgets</h3><div class="budget"><div class="budget-head"><b>Food</b><span>₹6,800 / ₹10,000</span></div><div class="progress"><i style="width:68%"></i></div></div><div class="budget"><div class="budget-head"><b>Shopping</b><span>₹11,400 / ₹15,000</span></div><div class="progress"><i style="width:76%"></i></div></div><div class="budget"><div class="budget-head"><b>Transport</b><span>₹3,200 / ₹5,000</span></div><div class="progress"><i style="width:64%"></i></div></div><div class="budget"><div class="budget-head"><b>Entertainment</b><span>₹4,100 / ₹5,000</span></div><div class="progress"><i style="width:82%"></i></div></div></div></section>
+
+<section id="analytics" class="page"><h1>Analytics</h1><p class="subtitle">Understand your financial patterns at a glance.</p>
+<div class="cards"><div class="card"><div class="metric-top">Savings Rate</div><div class="metric positive">43.5%</div><div class="muted">+5.2% vs July</div></div><div class="card"><div class="metric-top">Avg. Daily Spend</div><div class="metric">₹1,366</div><div class="muted">August average</div></div><div class="card"><div class="metric-top">Largest Expense</div><div class="metric">₹8,999</div><div class="muted">Shopping</div></div><div class="card"><div class="metric-top">Transactions</div><div class="metric">24</div><div class="muted">This month</div></div></div>
+<div class="grid2"><div class="card"><h3>Spending by Category</h3><div class="budget"><div class="budget-head"><b>Shopping</b><span>₹11,400</span></div><div class="progress"><i style="width:82%"></i></div></div><div class="budget"><div class="budget-head"><b>Food</b><span>₹6,800</span></div><div class="progress"><i style="width:60%"></i></div></div><div class="budget"><div class="budget-head"><b>Bills</b><span>₹4,450</span></div><div class="progress"><i style="width:42%"></i></div></div><div class="budget"><div class="budget-head"><b>Transport</b><span>₹3,200</span></div><div class="progress"><i style="width:30%"></i></div></div></div><div class="card"><h3>Financial Health</h3><div class="notice"><b>Great progress.</b><br>Your savings rate is above your monthly target of 35%.</div><p class="muted">Emergency fund</p><div class="progress"><i style="width:60%"></i></div><p class="muted">60% of your recommended six-month target.</p></div></div></section>
+
+<section id="goals" class="page"><h1>Savings Goals</h1><p class="subtitle">Turn your plans into measurable milestones.</p><div style="margin:22px 0"><button class="btn" onclick="addGoal()">+ New Goal</button></div>
+<div class="cards"><div class="card"><div class="metric-top"><b>MacBook Pro</b><b>50%</b></div><div class="metric">₹75,000 <span class="muted">/ ₹1,50,000</span></div><div class="progress"><i style="width:50%"></i></div><div class="muted">Technology</div></div><div class="card"><div class="metric-top"><b>Emergency Fund</b><b>60%</b></div><div class="metric">₹1,20,000 <span class="muted">/ ₹2,00,000</span></div><div class="progress"><i style="width:60%"></i></div><div class="muted">Safety</div></div><div class="card"><div class="metric-top"><b>Goa Trip</b><b>47%</b></div><div class="metric">₹35,000 <span class="muted">/ ₹75,000</span></div><div class="progress"><i style="width:47%"></i></div><div class="muted">Travel</div></div></div></section>
+
+<section id="accounts" class="page"><h1>Accounts</h1><p class="subtitle">A clear view of where your money lives.</p><div class="cards"><div class="card"><div class="metric-top">HDFC Savings</div><div class="metric">₹1,24,500</div><span class="pill">Bank Account</span></div><div class="card"><div class="metric-top">SBI Savings</div><div class="metric">₹42,800</div><span class="pill">Bank Account</span></div><div class="card"><div class="metric-top">Cash Wallet</div><div class="metric">₹7,200</div><span class="pill">Cash</span></div><div class="card"><div class="metric-top">Investments</div><div class="metric">₹85,000</div><span class="pill">Portfolio</span></div></div></section>
+
+<section id="settings" class="page"><h1>Settings</h1><p class="subtitle">Manage your Finora preferences.</p><div class="card" style="margin-top:25px;max-width:700px"><h3>Profile</h3><div class="form-grid"><div class="field"><label>Full Name</label><input value="Mahendra"></div><div class="field"><label>Email</label><input value="mahendra@example.com"></div><div class="field"><label>Currency</label><select><option>Indian Rupee (₹)</option><option>US Dollar ($)</option></select></div><div class="field"><label>Theme</label><select><option>Light</option><option>Dark</option></select></div></div><div style="margin-top:18px"><button class="btn" onclick="alert('Settings saved successfully!')">Save Changes</button></div></div></section>
+</main></div>
+
+<div class="modal" id="modal"><div class="modal-box"><button class="close" onclick="closeModal()">×</button><h2>Add Transaction</h2><form id="transactionForm"><div class="form-grid"><div class="field full"><label>Description</label><input id="desc" required placeholder="e.g. Grocery shopping"></div><div class="field"><label>Amount (₹)</label><input id="amount" type="number" min="1" required></div><div class="field"><label>Type</label><select id="type"><option>Expense</option><option>Income</option></select></div><div class="field"><label>Category</label><select id="category"><option>Food</option><option>Shopping</option><option>Bills</option><option>Transport</option><option>Entertainment</option><option>Salary</option><option>Investment</option><option>Healthcare</option></select></div><div class="field"><label>Date</label><input id="date" type="date" required></div><div class="field full"><button class="btn" type="submit">Save Transaction</button></div></div></form></div></div>
+
+<script>
+const defaults=[
+{d:"Monthly Salary",c:"Salary",date:"Aug 01, 2026",a:75000,t:"Income"},
+{d:"Rent Payment",c:"Bills",date:"Aug 02, 2026",a:12000,t:"Expense"},
+{d:"Grocery Store",c:"Food",date:"Aug 04, 2026",a:3200,t:"Expense"},
+{d:"Sony Headphones",c:"Shopping",date:"Aug 08, 2026",a:8999,t:"Expense"},
+{d:"Metro Recharge",c:"Transport",date:"Aug 10, 2026",a:1000,t:"Expense"},
+{d:"Restaurant Dinner",c:"Food",date:"Aug 12, 2026",a:1850,t:"Expense"},
+{d:"Freelance Payment",c:"Investment",date:"Aug 15, 2026",a:12500,t:"Income"},
+{d:"Electricity Bill",c:"Bills",date:"Aug 17, 2026",a:2450,t:"Expense"},
+{d:"Movie & Snacks",c:"Entertainment",date:"Aug 20, 2026",a:1200,t:"Expense"},
+{d:"Online Shopping",c:"Shopping",date:"Aug 22, 2026",a:3400,t:"Expense"}];
+let transactions=JSON.parse(localStorage.getItem("finora_transactions")||"null")||defaults;
+const rupee=n=>"₹"+Number(n).toLocaleString("en-IN");
+function rows(data){return data.slice().reverse().map(x=>`<div class="row"><div><b>${x.d}</b><div class="muted">${x.t}</div></div><div><span class="pill">${x.c}</span></div><div class="muted">${x.date}</div><div class="${x.t==="Income"?"income":"expense"}">${x.t==="Income"?"+":"−"}${rupee(x.a)}</div></div>`).join("")}
+function render(){
+let inc=transactions.filter(x=>x.t==="Income").reduce((s,x)=>s+x.a,0),exp=transactions.filter(x=>x.t==="Expense").reduce((s,x)=>s+x.a,0);
+income.textContent=rupee(inc);expenses.textContent=rupee(exp);savings.textContent=rupee(inc-exp);balance.textContent=rupee(184500+(inc-75000)-(exp-42350));
+recentRows.innerHTML=rows(transactions.slice(-5));allRows.innerHTML=rows(transactions);localStorage.setItem("finora_transactions",JSON.stringify(transactions));
+}
+function chart(){flowChart.innerHTML=[[62,40],[78,35],[55,48],[82,52],[90,46],[72,58],[88,50]].map(v=>`<div class="bar-group"><div class="bar" style="height:${v[0]}%"></div><div class="bar exp" style="height:${v[1]}%"></div></div>`).join("")}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(b.dataset.page).classList.add("active")});
+function openModal(){modal.classList.add("show");date.value=new Date().toISOString().slice(0,10)}function closeModal(){modal.classList.remove("show")}
+transactionForm.onsubmit=e=>{e.preventDefault();transactions.push({d:desc.value,c:category.value,date:new Date(date.value).toLocaleDateString("en-US",{month:"short",day:"2-digit",year:"numeric"}),a:+amount.value,t:type.value});render();closeModal();e.target.reset();alert("Transaction added successfully!")};
+function filterRows(){let q=globalSearch.value.toLowerCase(),tf=typeFilter.value,cf=catFilter.value;let f=transactions.filter(x=>(!q||(`${x.d} ${x.c} ${x.t}`).toLowerCase().includes(q))&&(tf==="All Types"||x.t===tf)&&(cf==="All Categories"||x.c===cf));allRows.innerHTML=f.length?rows(f):'<div class="empty">No matching transactions.</div>'}
+globalSearch.oninput=filterRows;typeFilter.onchange=filterRows;catFilter.onchange=filterRows;
+function addGoal(){let n=prompt("Goal name:");if(n)alert(n+" goal created successfully!")}
+render();chart();
+</script>
+</body>
+</html>
