@@ -1,152 +1,310 @@
 # 💰 Finora — Personal Finance Dashboard
 
-> **A modern, responsive, browser-based personal finance dashboard built with HTML, CSS, and JavaScript.**
+> A modern, responsive personal finance dashboard built with **HTML, CSS, and JavaScript**, featuring a neon glassmorphism interface, transaction tracking, financial analytics, budgets, savings goals, and browser-based data persistence.
 
-Finora helps users track income, expenses, budgets, savings goals, and financial insights through a clean and responsive interface.
+![Finora Banner](https://img.shields.io/badge/Finora-Personal%20Finance-635BFF?style=for-the-badge)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square\&logo=html5\&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square\&logo=css3\&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat-square\&logo=javascript\&logoColor=black)
+![Responsive](https://img.shields.io/badge/Responsive-Yes-16A36A?style=flat-square)
+![LocalStorage](https://img.shields.io/badge/Storage-LocalStorage-8B85FF?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-The upgraded version adds interactive transaction management, savings goals, dynamic analytics, budget monitoring, dark mode, CSV export, and browser-based data persistence.
+---
+
+## 🌐 Overview
+
+**Finora** is a frontend personal finance management application designed to provide a clean and interactive way to monitor personal finances.
+
+The application combines:
+
+* 💳 Transaction tracking
+* 📊 Financial analytics
+* 💰 Income and expense monitoring
+* 🎯 Savings goals
+* 📋 Budget tracking
+* 🏦 Account overview
+* ⚙️ Personal settings
+* 🌈 Neon glassmorphism UI
+* 💾 Local browser storage
+
+Everything currently runs directly in the browser without requiring a backend server or database.
 
 ---
 
 ## ✨ Features
 
-### 📊 Dashboard
+### 🏠 Dashboard
 
-* Total balance overview
+The dashboard provides a quick financial overview with:
+
+* Total balance
 * Total income
 * Total expenses
-* Automatic savings calculation
-* Savings rate
+* Current savings
 * Cash-flow visualization
+* Monthly budget progress
 * Recent transactions
-* Monthly budget overview
-* Automatic budget utilization
+
+The dashboard automatically recalculates financial totals when transactions are added.
+
+---
 
 ### 💳 Transaction Management
 
-* Add transactions
-* Edit existing transactions
-* Delete transactions
-* Income and expense classification
-* Category selection
-* Transaction dates
-* Search transactions instantly
-* Filter by type
-* Filter by category
-* Sort by:
+Finora includes a transaction management interface for recording financial activity.
 
-  * Newest
-  * Oldest
-  * Highest amount
-  * Lowest amount
+Users can add:
 
-### 💰 Budget Tracking
+* Transaction description
+* Amount
+* Income or Expense
+* Category
+* Date
 
-* Category-based budgets
-* Food budget
-* Shopping budget
-* Bills budget
-* Transport budget
-* Entertainment budget
-* Automatic spending calculation
-* Budget utilization percentage
-* Remaining budget calculation
-* Near-limit warning
-* Budget exceeded warning
+Supported categories include:
 
-### 🎯 Savings Goals
+* 🍔 Food
+* 🛍️ Shopping
+* 🧾 Bills
+* 🚇 Transport
+* 🎬 Entertainment
+* 💼 Salary
+* 📈 Investment
+* 🏥 Healthcare
 
-* Create custom savings goals
-* Set target amount
-* Set current saved amount
-* Automatic progress percentage
-* Add money to existing goals
-* Remaining amount calculation
-* Goal completion detection
-* Delete goals
-* Persistent goal storage
+Transactions are stored in the browser using **LocalStorage**.
 
-### 📈 Analytics
+---
+
+### 🔎 Transaction Search & Filtering
+
+The transaction page includes:
+
+* Global transaction search
+* Income filter
+* Expense filter
+* Category filter
+* Automatic transaction rendering
+
+Search works across:
+
+* Description
+* Category
+* Transaction type
+
+---
+
+### 📊 Financial Analytics
+
+The analytics section provides a quick view of financial activity, including:
 
 * Savings rate
 * Average daily spending
 * Largest expense
 * Transaction count
 * Spending by category
-* Expense-to-income ratio
-* Financial health indicator
-* Dynamic category spending bars
+* Emergency fund progress
+
+This makes it easier to understand spending patterns from a single interface.
+
+---
+
+### 📋 Budget Monitoring
+
+Finora provides category-based budget tracking.
+
+Current categories include:
+
+* Food
+* Shopping
+* Transport
+* Entertainment
+
+Each category displays:
+
+* Amount spent
+* Budget limit
+* Percentage used
+* Visual progress indicator
+
+---
+
+### 🎯 Savings Goals
+
+The Savings Goals section allows users to visualize financial targets.
+
+Example goals include:
+
+* 💻 MacBook Pro
+* 🛡️ Emergency Fund
+* 🌴 Goa Trip
+
+The interface displays:
+
+* Goal name
+* Current amount
+* Target amount
+* Completion percentage
+* Progress bar
+
+A **New Goal** action is also included for future goal-management expansion.
+
+---
 
 ### 🏦 Accounts
 
-Finora includes an account overview for:
+The Accounts section provides an overview of different money sources:
 
 * HDFC Savings
 * SBI Savings
 * Cash Wallet
 * Investments
 
-### 🌙 Dark Mode
-
-* Light theme
-* Dark theme
-* Theme preference support
-* Responsive UI in both modes
-
-### 📥 Data Export
-
-Export transaction history as a CSV file directly from the browser.
-
-Example:
-
-```text
-Description,Category,Date,Amount,Type
-Monthly Salary,Salary,Aug 01 2026,75000,Income
-Grocery Store,Food,Aug 04 2026,3200,Expense
-```
-
-### 💾 Local Storage
-
-Finora works without a backend.
-
-Data is stored locally in the browser using:
-
-```javascript
-localStorage
-```
-
-Stored information includes:
-
-* Transactions
-* Savings goals
-* Profile settings
+Each account displays its balance and account type.
 
 ---
 
-## 🎨 UI Highlights
+### ⚙️ Settings
 
-* Modern finance dashboard
-* Clean card-based layout
-* Responsive design
-* Mobile-friendly navigation
-* Interactive modals
-* Toast notifications
-* Progress indicators
-* Transaction action buttons
-* Dark mode
-* Minimal and professional interface
+Finora includes a personal settings section with:
+
+* Full name
+* Email
+* Currency preference
+* Theme preference
+
+Settings are saved using browser LocalStorage.
+
+---
+
+## 🌈 Neon Glassmorphism UI
+
+The latest version introduces a modern **neon-inspired visual design**.
+
+The interface uses:
+
+* Neon purple gradients
+* Cyan highlights
+* Pink ambient glow
+* Glassmorphism cards
+* Transparent backgrounds
+* Backdrop blur
+* Soft shadows
+* Neon navigation effects
+* Grid-based background pattern
+* Animated hover interactions
+
+The background is created entirely with **CSS gradients and effects**.
+
+### No external background image required.
+
+This keeps the project:
+
+* Lightweight
+* Fast
+* GitHub Pages compatible
+* Easy to customize
+
+---
+
+## 📱 Responsive Design
+
+Finora is designed to work across different screen sizes.
+
+### Desktop
+
+Full sidebar navigation with multi-column dashboard cards.
+
+### Tablet
+
+Cards and dashboard sections automatically adjust to available space.
+
+### Mobile
+
+The sidebar becomes a compact navigation bar and dashboard cards stack into smaller layouts.
+
+---
+
+## 💾 Data Persistence
+
+Finora uses the browser's built-in:
+
+```text
+localStorage
+```
+
+Transaction data is stored under:
+
+```text
+finora_transactions
+```
+
+Profile and preference information is also stored locally.
+
+This means data remains available after refreshing the page on the same browser.
+
+> ⚠️ Because the application uses LocalStorage, data is browser-specific and is not synchronized between devices.
+
+---
+
+## 🧮 Financial Calculations
+
+Finora calculates financial metrics dynamically.
+
+### Total Income
+
+```text
+Total Income = Sum of all Income Transactions
+```
+
+### Total Expenses
+
+```text
+Total Expenses = Sum of all Expense Transactions
+```
+
+### Savings
+
+```text
+Savings = Income - Expenses
+```
+
+### Savings Rate
+
+```text
+Savings Rate = (Savings / Income) × 100
+```
+
+These values are recalculated whenever transaction data changes.
+
+---
+
+## 📊 Cash Flow Visualization
+
+The dashboard includes a visual cash-flow chart displaying:
+
+* Income
+* Expenses
+
+The chart is generated dynamically using JavaScript and CSS-based bars.
+
+No chart library is required.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Technology   | Purpose                   |
-| ------------ | ------------------------- |
-| HTML5        | Application structure     |
-| CSS3         | Responsive UI and styling |
-| JavaScript   | Application logic         |
-| LocalStorage | Browser data persistence  |
-| CSV          | Transaction export        |
+| Technology          | Purpose                             |
+| ------------------- | ----------------------------------- |
+| HTML5               | Application structure               |
+| CSS3                | UI, responsive design, neon effects |
+| JavaScript ES6+     | Application logic                   |
+| LocalStorage        | Browser-based persistence           |
+| CSS Gradients       | Neon background                     |
+| CSS Backdrop Filter | Glassmorphism                       |
+| Git                 | Version control                     |
+| GitHub Pages        | Static deployment                   |
 
 ---
 
@@ -159,31 +317,35 @@ Finora/
 └── README.md
 ```
 
-The entire application is currently contained inside:
+The current application is intentionally maintained as a **single-file frontend project**, containing:
 
-```text
-index.html
-```
+* HTML
+* CSS
+* JavaScript
 
-This makes Finora extremely easy to run and deploy.
+inside `index.html`.
+
+This makes the project simple to run and deploy.
 
 ---
 
-## 🚀 Run Locally
+## 🚀 Getting Started
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/mahitech580/Finora.git
 ```
 
-### 2. Open the project
+### 2. Open the Project
 
 ```bash
 cd Finora
 ```
 
-### 3. Launch
+### 3. Run
+
+Since Finora is a static frontend project, no installation is required.
 
 Simply open:
 
@@ -193,184 +355,201 @@ index.html
 
 in your browser.
 
-No:
-
-* Node.js
-* Python server
-* Database
-* API key
-* Backend
-
-is required.
-
 ---
 
-## 🌐 GitHub Pages
+## 🌐 GitHub Pages Deployment
 
-Finora can be deployed directly using GitHub Pages because it is a static HTML/CSS/JavaScript application.
+Finora can be deployed directly using GitHub Pages.
 
-### Deployment
+### Steps
 
 1. Push the project to GitHub.
 2. Open the repository.
-3. Go to **Settings → Pages**.
-4. Select the main branch.
-5. Select the root folder.
-6. Save.
+3. Go to **Settings**.
+4. Select **Pages**.
+5. Select the deployment branch.
+6. Choose the root folder.
+7. Save the configuration.
 
-Your dashboard can then be accessed through your GitHub Pages URL.
-
----
-
-## 🧠 How It Works
-
-Finora calculates financial metrics dynamically from stored transactions.
-
-### Income
-
-```text
-Total Income = Sum of all Income transactions
-```
-
-### Expenses
-
-```text
-Total Expenses = Sum of all Expense transactions
-```
-
-### Savings
-
-```text
-Savings = Income − Expenses
-```
-
-### Savings Rate
-
-```text
-Savings Rate = (Savings / Income) × 100
-```
-
-### Budget Utilization
-
-```text
-Budget Usage = (Category Spending / Category Budget) × 100
-```
-
-These values update automatically when transactions are added, edited, or deleted.
+Your Finora dashboard can then be accessed through the GitHub Pages URL generated by GitHub.
 
 ---
 
 ## 🔐 Privacy
 
-Finora is designed as a client-side application.
+Finora currently operates entirely on the client side.
 
-Your transaction and goal data is stored in your browser using LocalStorage.
+There is:
 
-No personal financial data is sent to a Finora backend because the current project does not use one.
+* ❌ No backend server
+* ❌ No database
+* ❌ No external API
+* ❌ No authentication service
+* ❌ No bank-account connection
 
-For shared/public computers, clear browser storage after use.
-
----
-
-## 📱 Responsive Design
-
-Finora adapts to different screen sizes:
-
-* 🖥️ Desktop
-* 💻 Laptop
-* 📱 Mobile
-* 📟 Tablet
-
-The sidebar automatically changes into a compact mobile navigation layout.
+Financial information is stored locally in the browser using LocalStorage.
 
 ---
 
-## 🔮 Future Improvements
+## 🎨 UI Design Highlights
 
-Possible future versions can include:
+The interface focuses on a modern financial SaaS-style design.
 
-* Backend API
-* User authentication
-* MySQL/PostgreSQL database
-* Multiple user accounts
-* Real bank account integration
-* Recurring transactions
-* Advanced charts
-* Monthly/yearly reports
-* PDF financial reports
-* Budget creation from the UI
-* Account transfers
-* Bill reminders
-* Notifications
-* Financial forecasting
-* AI-powered spending insights
-* Expense prediction
-* Investment tracking
+### Visual Elements
+
+* Neon ambient lighting
+* Purple/cyan gradient effects
+* Frosted glass cards
+* Rounded components
+* Responsive dashboard
+* Minimal navigation
+* Financial status colors
+* Interactive hover states
+* Soft shadows
+* Grid background
+
+---
+
+## 🔄 Application Flow
+
+```text
+User
+ │
+ ▼
+Finora Dashboard
+ │
+ ├── Dashboard
+ │    ├── Balance
+ │    ├── Income
+ │    ├── Expenses
+ │    ├── Savings
+ │    └── Cash Flow
+ │
+ ├── Transactions
+ │    ├── Add Transaction
+ │    ├── Search
+ │    └── Filters
+ │
+ ├── Budgets
+ │    └── Category Progress
+ │
+ ├── Analytics
+ │    ├── Savings Rate
+ │    ├── Spending
+ │    └── Financial Health
+ │
+ ├── Savings Goals
+ │
+ ├── Accounts
+ │
+ └── Settings
+       │
+       ▼
+   LocalStorage
+```
 
 ---
 
 ## 💡 Project Highlights
 
-This project demonstrates practical frontend development concepts including:
+This project demonstrates practical knowledge of:
 
 * DOM manipulation
 * JavaScript event handling
-* CRUD operations
+* Form handling
+* Array methods
+* Filtering data
+* Dynamic HTML rendering
 * LocalStorage
-* Dynamic UI rendering
-* Filtering and sorting
-* Form validation
-* Modal interfaces
 * Responsive CSS
-* Data aggregation
-* CSV generation
+* CSS gradients
+* Glassmorphism
+* UI component design
+* Financial calculations
 * Client-side application architecture
 
 ---
 
-## 🎯 Learning Outcomes
+## 🧠 What I Learned
 
-Building Finora provides practical experience with:
+Building Finora helped strengthen practical skills in:
 
-```text
-HTML
-   ↓
-CSS
-   ↓
-JavaScript
-   ↓
-DOM Manipulation
-   ↓
-LocalStorage
-   ↓
-CRUD Operations
-   ↓
-Data Processing
-   ↓
-Responsive UI
-```
+### Frontend Development
+
+* Creating responsive layouts
+* Building reusable UI patterns
+* Designing dashboard interfaces
+* Creating modern CSS effects
+
+### JavaScript
+
+* DOM manipulation
+* Event listeners
+* Form processing
+* Array filtering and reduction
+* Dynamic rendering
+* Browser storage
+
+### UI/UX
+
+* Dashboard information hierarchy
+* Responsive navigation
+* Visual feedback
+* Progress indicators
+* Glassmorphism design
+* Neon visual systems
+
+---
+
+## 🚧 Future Improvements
+
+Potential future versions can introduce:
+
+* 🔐 User authentication
+* 🗄️ Database integration
+* ☁️ Cloud synchronization
+* 💳 Bank account integration
+* 📅 Date-range analytics
+* 📈 Advanced financial charts
+* 📊 Monthly comparison reports
+* 🧾 CSV import
+* 📤 Advanced CSV export
+* 🎯 Persistent savings-goal management
+* 💰 Custom budget creation
+* 🏦 Account management
+* 🔄 Money transfers between accounts
+* 🌙 Fully functional dark/light theme switching
+* 🔔 Advanced notifications
+* 📱 PWA support
+* 🤖 AI-powered spending insights
 
 ---
 
 ## 📌 Current Version
 
-**Finora v2.0**
+```text
+Finora v2.1
+```
 
-### v2.0 includes
+### Current Build Includes
 
-* Dynamic dashboard
-* Transaction CRUD
-* Search
-* Filters
-* Sorting
-* Budget monitoring
-* Savings goals
-* Analytics
-* Dark mode
-* CSV export
-* LocalStorage persistence
-* Toast notifications
-* Responsive design
+```text
+✓ Neon background
+✓ Glassmorphism cards
+✓ Responsive UI
+✓ Dashboard
+✓ Transaction management
+✓ Search
+✓ Filters
+✓ Budget monitoring
+✓ Savings goals
+✓ Analytics
+✓ Accounts
+✓ Settings
+✓ LocalStorage
+✓ Dynamic financial calculations
+✓ Cash-flow visualization
+```
 
 ---
 
@@ -378,7 +557,11 @@ Responsive UI
 
 **Mahendra**
 
+Computer Science Engineering Graduate
+Python • JavaScript • SQL • AI/ML • Full Stack Development
+
 GitHub:
+
 https://github.com/mahitech580
 
 ---
@@ -393,11 +576,26 @@ MIT License
 Copyright (c) 2026 Mahendra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files, to deal in the Software
-without restriction, including without limitation the rights to use, copy,
-modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
 
 ---
 
-⭐ **If you find Finora useful, consider giving the repository a star!**
+⭐ **If you like the project, consider giving the repository a star!**
+
+Built with **HTML + CSS + JavaScript** by **Mahendra**.
