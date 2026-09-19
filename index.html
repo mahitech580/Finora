@@ -575,6 +575,231 @@ h1{
     0 0 12px rgba(99,91,255,.2);
 }
 
+
+/* AUTHENTICATION */
+.auth-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  background:
+    radial-gradient(circle at 15% 20%,rgba(99,91,255,.22),transparent 28%),
+    radial-gradient(circle at 85% 75%,rgba(0,255,200,.15),transparent 28%),
+    linear-gradient(135deg,#f8f9ff,#eef4ff 50%,#faf5ff);
+}
+
+.auth-shell{
+  width:min(980px,100%);
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 25px 80px rgba(30,40,70,.14),0 0 40px rgba(99,91,255,.08);
+  backdrop-filter:blur(20px);
+}
+
+.auth-brand{
+  padding:48px;
+  color:#fff;
+  background:
+    radial-gradient(circle at 20% 15%,rgba(139,133,255,.45),transparent 30%),
+    linear-gradient(145deg,#101426,#171d38 55%,#0b1020);
+  position:relative;
+  overflow:hidden;
+}
+
+.auth-brand::after{
+  content:"";
+  position:absolute;
+  width:240px;
+  height:240px;
+  right:-80px;
+  bottom:-110px;
+  border-radius:50%;
+  border:1px solid rgba(0,255,200,.18);
+  box-shadow:0 0 0 30px rgba(99,91,255,.04),0 0 0 60px rgba(99,91,255,.025);
+}
+
+.auth-logo{
+  font-size:34px;
+  font-weight:800;
+  letter-spacing:-1px;
+  margin-bottom:55px;
+}
+
+.auth-logo span{
+  color:#8b85ff;
+  text-shadow:0 0 15px rgba(139,133,255,.7);
+}
+
+.auth-brand h1{
+  font-size:39px;
+  line-height:1.08;
+  margin:0 0 16px;
+  max-width:440px;
+}
+
+.auth-brand p{
+  margin:0;
+  color:#b8c1d1;
+  line-height:1.7;
+  max-width:470px;
+}
+
+.auth-features{
+  margin-top:34px;
+  display:grid;
+  gap:14px;
+}
+
+.auth-feature{
+  padding:14px 15px;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  color:#e6e9f2;
+  font-size:13px;
+}
+
+.auth-form-wrap{
+  padding:42px;
+  display:flex;
+  align-items:center;
+}
+
+.auth-form{
+  width:100%;
+  max-width:390px;
+  margin:auto;
+}
+
+.auth-form h2{
+  margin:0;
+  font-size:28px;
+}
+
+.auth-form .auth-subtitle{
+  margin:7px 0 24px;
+  color:#718096;
+  font-size:14px;
+}
+
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  padding:4px;
+  margin-bottom:22px;
+  background:#edf0f6;
+  border-radius:11px;
+}
+
+.auth-tab{
+  padding:10px;
+  border-radius:8px;
+  background:transparent;
+  color:#667085;
+  font-weight:700;
+}
+
+.auth-tab.active{
+  color:#2f3550;
+  background:#fff;
+  box-shadow:0 4px 12px rgba(30,40,70,.08);
+}
+
+.auth-fields{
+  display:grid;
+  gap:14px;
+}
+
+.auth-field label{
+  display:block;
+  font-size:12px;
+  color:#718096;
+  margin-bottom:6px;
+}
+
+.auth-field input{
+  width:100%;
+  padding:12px 13px;
+  border:1px solid #dfe5ee;
+  border-radius:10px;
+  outline:0;
+  background:#fff;
+  transition:.2s;
+}
+
+.auth-field input:focus{
+  border-color:#8179ff;
+  box-shadow:0 0 0 3px rgba(99,91,255,.08);
+}
+
+.auth-submit{
+  width:100%;
+  margin-top:4px;
+}
+
+.auth-message{
+  min-height:18px;
+  margin:12px 0 0;
+  font-size:12px;
+  text-align:center;
+}
+
+.auth-message.error{ color:#d64550; }
+.auth-message.success{ color:#16845a; }
+
+.auth-note{
+  margin-top:18px;
+  color:#8a93a5;
+  font-size:11px;
+  line-height:1.5;
+  text-align:center;
+}
+
+.logout-btn{
+  margin-left:12px;
+  padding:8px 11px;
+  border-radius:9px;
+  background:#eef1f7;
+  color:#455066;
+  font-size:12px;
+  font-weight:700;
+}
+
+.logout-btn:hover{
+  background:#e4e8f0;
+}
+
+.auth-locked{
+  display:none;
+}
+
+@media(max-width:760px){
+  .auth-shell{
+    grid-template-columns:1fr;
+  }
+  .auth-brand{
+    padding:30px;
+  }
+  .auth-brand h1{
+    font-size:31px;
+  }
+  .auth-logo{
+    margin-bottom:30px;
+  }
+  .auth-features{
+    display:none;
+  }
+  .auth-form-wrap{
+    padding:30px 24px;
+  }
+}
+
 /* RESPONSIVE */
 
 @media(max-width:1050px){
@@ -668,7 +893,87 @@ h1{
 
 <body>
 
-<div class="app">
+
+<!-- AUTHENTICATION -->
+<section class="auth-screen" id="authScreen">
+  <div class="auth-shell">
+    <div class="auth-brand">
+      <div class="auth-logo">Fin<span>ora</span></div>
+      <h1>Take control of your money.</h1>
+      <p>Sign in to manage transactions, budgets, savings goals and your financial overview from one place.</p>
+      <div class="auth-features">
+        <div class="auth-feature">↗ Track income and expenses</div>
+        <div class="auth-feature">▤ Monitor monthly budgets</div>
+        <div class="auth-feature">◇ Keep savings goals organized</div>
+      </div>
+    </div>
+
+    <div class="auth-form-wrap">
+      <div class="auth-form">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="loginTab">Login</button>
+          <button type="button" class="auth-tab" id="registerTab">Create account</button>
+        </div>
+
+        <div id="loginPanel">
+          <h2>Welcome back</h2>
+          <p class="auth-subtitle">Log in to your Finora account.</p>
+
+          <form id="loginForm" class="auth-fields">
+            <div class="auth-field">
+              <label>Email</label>
+              <input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com">
+            </div>
+
+            <div class="auth-field">
+              <label>Password</label>
+              <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Enter your password">
+            </div>
+
+            <button class="btn auth-submit" type="submit">Login to Finora</button>
+          </form>
+        </div>
+
+        <div id="registerPanel" style="display:none">
+          <h2>Create your account</h2>
+          <p class="auth-subtitle">Start with a private local Finora profile.</p>
+
+          <form id="registerForm" class="auth-fields">
+            <div class="auth-field">
+              <label>Full Name</label>
+              <input id="registerName" type="text" autocomplete="name" required placeholder="Your full name">
+            </div>
+
+            <div class="auth-field">
+              <label>Email</label>
+              <input id="registerEmail" type="email" autocomplete="email" required placeholder="you@example.com">
+            </div>
+
+            <div class="auth-field">
+              <label>Password</label>
+              <input id="registerPassword" type="password" autocomplete="new-password" minlength="6" required placeholder="At least 6 characters">
+            </div>
+
+            <div class="auth-field">
+              <label>Confirm Password</label>
+              <input id="registerConfirm" type="password" autocomplete="new-password" minlength="6" required placeholder="Re-enter your password">
+            </div>
+
+            <button class="btn auth-submit" type="submit">Create Account</button>
+          </form>
+        </div>
+
+        <div class="auth-message" id="authMessage"></div>
+        <div class="auth-note">
+          This single-file version stores account and finance data in your browser's local storage.
+          It is suitable for a frontend/demo app, not production authentication.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="app auth-locked" id="app">
 
 <!-- SIDEBAR -->
 
@@ -735,13 +1040,15 @@ h1{
 <div class="profile">
 
 <div>
-<b>Mahendra</b>
+<b id="profileDisplayName">Mahendra</b>
 <div class="muted">Personal account</div>
 </div>
 
-<div class="avatar">M</div>
+<div class="avatar" id="profileAvatar">M</div>
 
 </div>
+
+<button class="logout-btn" id="logoutBtn" type="button">Logout</button>
 
 </header>
 
@@ -749,7 +1056,7 @@ h1{
 
 <section id="dashboard" class="page active">
 
-<h1>Good evening, Mahendra 👋</h1>
+<h1 id="dashboardGreeting">Good evening, Mahendra 👋</h1>
 
 <p class="subtitle">
 Here's your financial overview for August 2026.
@@ -1749,12 +2056,32 @@ t:"Expense"
 ];
 
 
-/* LOAD DATA */
+/* AUTH + USER-SCOPED DATA */
 
-let transactions=
-JSON.parse(
-localStorage.getItem("finora_transactions") || "null"
-) || defaults;
+let currentUser = null;
+let transactions = [];
+
+function userDataKey(name){
+  if(!currentUser) return `finora_${name}`;
+  return `finora_user_${currentUser.id}_${name}`;
+}
+
+function getUsers(){
+  return JSON.parse(localStorage.getItem("finora_users") || "{}");
+}
+
+function saveUsers(users){
+  localStorage.setItem("finora_users",JSON.stringify(users));
+}
+
+function loadTransactions(){
+  const saved=localStorage.getItem(userDataKey("transactions"));
+  if(saved){
+    transactions=JSON.parse(saved);
+  }else{
+    transactions=defaults.map(x=>({...x}));
+  }
+}
 
 
 /* FORMAT RUPEE */
@@ -1855,7 +2182,7 @@ rows(transactions);
 /* SAVE */
 
 localStorage.setItem(
-"finora_transactions",
+userDataKey("transactions"),
 JSON.stringify(transactions)
 );
 
@@ -2117,24 +2444,26 @@ n+" goal created successfully!"
 function saveSettings(){
 
 localStorage.setItem(
-"finora_name",
+userDataKey("name"),
 profileName.value
 );
 
 localStorage.setItem(
-"finora_email",
+userDataKey("email"),
 profileEmail.value
 );
 
 localStorage.setItem(
-"finora_currency",
+userDataKey("currency"),
 currency.value
 );
 
 localStorage.setItem(
-"finora_theme",
+userDataKey("theme"),
 theme.value
 );
+
+updateProfileUI();
 
 alert(
 "Settings saved successfully!"
@@ -2148,22 +2477,26 @@ alert(
 function loadSettings(){
 
 let savedName=
-localStorage.getItem("finora_name");
+localStorage.getItem(userDataKey("name"));
 
 let savedEmail=
-localStorage.getItem("finora_email");
+localStorage.getItem(userDataKey("email"));
 
 let savedCurrency=
-localStorage.getItem("finora_currency");
+localStorage.getItem(userDataKey("currency"));
 
 let savedTheme=
-localStorage.getItem("finora_theme");
+localStorage.getItem(userDataKey("theme"));
 
 if(savedName)
 profileName.value=savedName;
+else if(currentUser)
+profileName.value=currentUser.name;
 
 if(savedEmail)
 profileEmail.value=savedEmail;
+else if(currentUser)
+profileEmail.value=currentUser.email;
 
 if(savedCurrency)
 currency.value=savedCurrency;
@@ -2171,7 +2504,203 @@ currency.value=savedCurrency;
 if(savedTheme)
 theme.value=savedTheme;
 
+updateProfileUI();
+
 }
+
+
+
+/* AUTHENTICATION */
+
+const authScreen=document.getElementById("authScreen");
+const app=document.getElementById("app");
+const loginTab=document.getElementById("loginTab");
+const registerTab=document.getElementById("registerTab");
+const loginPanel=document.getElementById("loginPanel");
+const registerPanel=document.getElementById("registerPanel");
+const authMessage=document.getElementById("authMessage");
+const loginForm=document.getElementById("loginForm");
+const registerForm=document.getElementById("registerForm");
+const logoutBtn=document.getElementById("logoutBtn");
+
+function setAuthMessage(message,type=""){
+  authMessage.textContent=message;
+  authMessage.className="auth-message"+(type?` ${type}`:"");
+}
+
+function switchAuth(mode){
+  const login=mode==="login";
+
+  loginTab.classList.toggle("active",login);
+  registerTab.classList.toggle("active",!login);
+  loginPanel.style.display=login?"block":"none";
+  registerPanel.style.display=login?"none":"block";
+  setAuthMessage("");
+}
+
+loginTab.onclick=()=>switchAuth("login");
+registerTab.onclick=()=>switchAuth("register");
+
+async function hashPassword(password){
+  if(window.crypto && crypto.subtle){
+    const data=new TextEncoder().encode(password);
+    const buffer=await crypto.subtle.digest("SHA-256",data);
+    return Array.from(new Uint8Array(buffer))
+      .map(b=>b.toString(16).padStart(2,"0"))
+      .join("");
+  }
+
+  /* Local demo fallback for older browsers. */
+  let hash=0;
+  for(let i=0;i<password.length;i++){
+    hash=((hash<<5)-hash)+password.charCodeAt(i);
+    hash|=0;
+  }
+  return String(hash);
+}
+
+function updateProfileUI(){
+  if(!currentUser) return;
+
+  const savedName=localStorage.getItem(userDataKey("name"));
+  const displayName=savedName || currentUser.name || "User";
+  const firstInitial=displayName.trim().charAt(0).toUpperCase() || "U";
+
+  profileDisplayName.textContent=displayName;
+  profileAvatar.textContent=firstInitial;
+  dashboardGreeting.textContent=`Good evening, ${displayName} 👋`;
+}
+
+async function loginUser(email,password){
+  const users=getUsers();
+  const key=email.trim().toLowerCase();
+  const user=users[key];
+
+  if(!user){
+    setAuthMessage("No account found for this email.","error");
+    return;
+  }
+
+  const passwordHash=await hashPassword(password);
+
+  if(user.passwordHash!==passwordHash){
+    setAuthMessage("Incorrect password.","error");
+    return;
+  }
+
+  currentUser=user;
+  localStorage.setItem("finora_session",user.id);
+
+  loadTransactions();
+  loadSettings();
+  render();
+
+  app.classList.remove("auth-locked");
+  authScreen.style.display="none";
+  setAuthMessage("");
+}
+
+loginForm.onsubmit=async e=>{
+  e.preventDefault();
+  const email=loginEmail.value.trim();
+  const password=loginPassword.value;
+
+  if(!email || !password){
+    setAuthMessage("Enter your email and password.","error");
+    return;
+  }
+
+  await loginUser(email,password);
+};
+
+registerForm.onsubmit=async e=>{
+  e.preventDefault();
+
+  const name=registerName.value.trim();
+  const email=registerEmail.value.trim().toLowerCase();
+  const password=registerPassword.value;
+  const confirm=registerConfirm.value;
+
+  if(password.length<6){
+    setAuthMessage("Password must contain at least 6 characters.","error");
+    return;
+  }
+
+  if(password!==confirm){
+    setAuthMessage("Passwords do not match.","error");
+    return;
+  }
+
+  const users=getUsers();
+
+  if(users[email]){
+    setAuthMessage("An account with this email already exists.","error");
+    switchAuth("login");
+    loginEmail.value=email;
+    return;
+  }
+
+  const user={
+    id:crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    name,
+    email,
+    passwordHash:await hashPassword(password)
+  };
+
+  users[email]=user;
+  saveUsers(users);
+
+  currentUser=user;
+  localStorage.setItem("finora_session",user.id);
+
+  /* Start this user with a private copy of the demo data. */
+  loadTransactions();
+  localStorage.setItem(userDataKey("name"),name);
+  localStorage.setItem(userDataKey("email"),email);
+  loadSettings();
+  render();
+
+  app.classList.remove("auth-locked");
+  authScreen.style.display="none";
+  setAuthMessage("");
+
+  registerForm.reset();
+};
+
+logoutBtn.onclick=()=>{
+  localStorage.removeItem("finora_session");
+  currentUser=null;
+  transactions=[];
+  app.classList.add("auth-locked");
+  authScreen.style.display="flex";
+  switchAuth("login");
+  loginForm.reset();
+  registerForm.reset();
+  setAuthMessage("You have been logged out.","success");
+};
+
+function restoreSession(){
+  const sessionId=localStorage.getItem("finora_session");
+  const users=getUsers();
+
+  currentUser=Object.values(users).find(u=>u.id===sessionId) || null;
+
+  if(!currentUser){
+    localStorage.removeItem("finora_session");
+    app.classList.add("auth-locked");
+    authScreen.style.display="flex";
+    return;
+  }
+
+  loadTransactions();
+  loadSettings();
+  updateProfileUI();
+
+  app.classList.remove("auth-locked");
+  authScreen.style.display="none";
+  render();
+}
+
 
 
 /* CLOSE MODAL WHEN CLICKING OUTSIDE */
@@ -2201,9 +2730,7 @@ closeModal();
 
 /* INITIALIZE */
 
-loadSettings();
-
-render();
+restoreSession();
 
 </script>
 
