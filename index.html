@@ -2027,6 +2027,15 @@ const type = $('type');
 const category = $('category');
 const dateInput = $('date');
 
+// Explicit references for authentication fields.
+// Do not rely on browser-created globals for element IDs.
+const loginEmailEl = $('loginEmail');
+const loginPasswordEl = $('loginPassword');
+const registerNameEl = $('registerName');
+const registerEmailEl = $('registerEmail');
+const registerPasswordEl = $('registerPassword');
+const registerConfirmEl = $('registerConfirm');
+
 let currentUser = null;
 let transactions = [];
 let budgets = {};
@@ -2636,56 +2645,140 @@ async function loginUser(email, password) {
 
 loginForm.onsubmit = async e => {
   e.preventDefault();
-  await loginUser(loginEmail.value, loginPassword.value);
+
+  try {
+    await loginUser(
+      loginEmailEl.value,
+      loginPasswordEl.value
+    );
+  } catch (error) {
+    console.error('Finora login error:', error);
+    setAuthMessage(
+      'Login failed. Please try again.',
+      'error'
+    );
+  }
 };
 
 registerForm.onsubmit = async e => {
   e.preventDefault();
 
-  const name = registerName.value.trim();
-  const email = registerEmail.value.trim().toLowerCase();
-  const password = registerPassword.value;
-  const confirm = registerConfirm.value;
+  try {
+    const name = registerNameEl.value.trim();
+    const email = registerEmailEl.value.trim().toLowerCase();
+    const password = registerPasswordEl.value;
+    const confirm = registerConfirmEl.value;
 
-  if (!name) return setAuthMessage('Enter your full name.', 'error');
-  if (password.length < 6) return setAuthMessage('Password must contain at least 6 characters.', 'error');
-  if (password !== confirm) return setAuthMessage('Passwords do not match.', 'error');
+    if (!name) {
+      setAuthMessage(
+        'Enter your full name.',
+        'error'
+      );
+      registerNameEl.focus();
+      return;
+    }
 
-  const users = getUsers();
-  if (users[email]) {
-    setAuthMessage('An account with this email already exists.', 'error');
-    switchAuth('login');
-    loginEmail.value = email;
-    return;
+    if (!email || !email.includes('@')) {
+      setAuthMessage(
+        'Enter a valid email address.',
+        'error'
+      );
+      registerEmailEl.focus();
+      return;
+    }
+
+    if (password.length < 6) {
+      setAuthMessage(
+        'Password must contain at least 6 characters.',
+        'error'
+      );
+      registerPasswordEl.focus();
+      return;
+    }
+
+    if (password !== confirm) {
+      setAuthMessage(
+        'Passwords do not match.',
+        'error'
+      );
+      registerConfirmEl.focus();
+      return;
+    }
+
+    const users = getUsers();
+
+    if (users[email]) {
+      setAuthMessage(
+        'An account with this email already exists. Login instead.',
+        'error'
+      );
+      switchAuth('login');
+      loginEmailEl.value = email;
+      loginEmailEl.focus();
+      return;
+    }
+
+    const hashed = await hashPassword(password);
+
+    const user = {
+      id: id(),
+      name,
+      email,
+      passwordHash: hashed.hash,
+      salt: hashed.salt
+    };
+
+    users[email] = user;
+    saveUsers(users);
+
+    currentUser = user;
+
+    localStorage.setItem(
+      'finora_session',
+      user.id
+    );
+
+    localStorage.setItem(
+      userDataKey('name'),
+      name
+    );
+
+    localStorage.setItem(
+      userDataKey('email'),
+      email
+    );
+
+    localStorage.setItem(
+      userDataKey('openingBalance'),
+      '150000'
+    );
+
+    loadUserData();
+    loadSettings();
+    render();
+    addExportButton();
+
+    app.classList.remove(
+      'auth-locked'
+    );
+
+    authScreen.style.display =
+      'none';
+
+    registerForm.reset();
+    setAuthMessage('');
+
+  } catch (error) {
+    console.error(
+      'Finora registration error:',
+      error
+    );
+
+    setAuthMessage(
+      'Account creation failed. Please refresh the page and try again.',
+      'error'
+    );
   }
-
-  const hashed = await hashPassword(password);
-  const user = {
-    id: id(),
-    name,
-    email,
-    passwordHash: hashed.hash,
-    salt: hashed.salt
-  };
-
-  users[email] = user;
-  saveUsers(users);
-
-  currentUser = user;
-  localStorage.setItem('finora_session', user.id);
-  localStorage.setItem(userDataKey('name'), name);
-  localStorage.setItem(userDataKey('email'), email);
-  localStorage.setItem(userDataKey('openingBalance'), '150000');
-
-  loadUserData();
-  loadSettings();
-  render();
-  addExportButton();
-
-  app.classList.remove('auth-locked');
-  authScreen.style.display = 'none';
-  registerForm.reset();
-  setAuthMessage('');
 };
 
 logoutBtn.onclick = () => {
