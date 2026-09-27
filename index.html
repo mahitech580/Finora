@@ -1968,768 +1968,861 @@ Save Transaction
 </div>
 
 <script>
+/*
+  FINORA REALISTIC FRONTEND SCRIPT
+  Replace the existing <script>...</script> in your Finora HTML with this block.
+  Features:
+  - User-specific localStorage data
+  - Real transaction totals
+  - Deterministic 7-day cash-flow chart (no Math.random)
+  - Current-month filtering for dashboard metrics
+  - Search + type + category filters
+  - Delete transactions
+  - Persistent budgets
+  - Persistent savings goals
+  - Current-date defaults
+  - Working light/dark theme
+  - CSV export
+  - Better browser-side password hashing (PBKDF2 when available)
 
-/* DEFAULT TRANSACTIONS */
+  Note: localStorage authentication is suitable for a frontend/demo portfolio project,
+  not for production financial data or real authentication.
+*/
 
-const defaults=[
+const $ = id => document.getElementById(id);
 
-{
-d:"Monthly Salary",
-c:"Salary",
-date:"Aug 01, 2026",
-a:75000,
-t:"Income"
-},
-
-{
-d:"Rent Payment",
-c:"Bills",
-date:"Aug 02, 2026",
-a:12000,
-t:"Expense"
-},
-
-{
-d:"Grocery Store",
-c:"Food",
-date:"Aug 04, 2026",
-a:3200,
-t:"Expense"
-},
-
-{
-d:"Sony Headphones",
-c:"Shopping",
-date:"Aug 08, 2026",
-a:8999,
-t:"Expense"
-},
-
-{
-d:"Metro Recharge",
-c:"Transport",
-date:"Aug 10, 2026",
-a:1000,
-t:"Expense"
-},
-
-{
-d:"Restaurant Dinner",
-c:"Food",
-date:"Aug 12, 2026",
-a:1850,
-t:"Expense"
-},
-
-{
-d:"Freelance Payment",
-c:"Investment",
-date:"Aug 15, 2026",
-a:12500,
-t:"Income"
-},
-
-{
-d:"Electricity Bill",
-c:"Bills",
-date:"Aug 17, 2026",
-a:2450,
-t:"Expense"
-},
-
-{
-d:"Movie & Snacks",
-c:"Entertainment",
-date:"Aug 20, 2026",
-a:1200,
-t:"Expense"
-},
-
-{
-d:"Online Shopping",
-c:"Shopping",
-date:"Aug 22, 2026",
-a:3400,
-t:"Expense"
-}
-
-];
-
-
-/* AUTH + USER-SCOPED DATA */
+const authScreen = $('authScreen');
+const app = $('app');
+const loginTab = $('loginTab');
+const registerTab = $('registerTab');
+const loginPanel = $('loginPanel');
+const registerPanel = $('registerPanel');
+const authMessage = $('authMessage');
+const loginForm = $('loginForm');
+const registerForm = $('registerForm');
+const logoutBtn = $('logoutBtn');
+const modal = $('modal');
+const transactionForm = $('transactionForm');
+const globalSearch = $('globalSearch');
+const typeFilter = $('typeFilter');
+const catFilter = $('catFilter');
+const allRows = $('allRows');
+const recentRows = $('recentRows');
+const flowChart = $('flowChart');
+const profileDisplayName = $('profileDisplayName');
+const profileAvatar = $('profileAvatar');
+const dashboardGreeting = $('dashboardGreeting');
+const dashboardSubtitle = document.querySelector('#dashboard .subtitle');
+const balanceEl = $('balance');
+const incomeEl = $('income');
+const expensesEl = $('expenses');
+const savingsEl = $('savings');
+const profileName = $('profileName');
+const profileEmail = $('profileEmail');
+const currency = $('currency');
+const theme = $('theme');
+const desc = $('desc');
+const amount = $('amount');
+const type = $('type');
+const category = $('category');
+const dateInput = $('date');
 
 let currentUser = null;
 let transactions = [];
+let budgets = {};
+let goals = [];
 
-function userDataKey(name){
-  if(!currentUser) return `finora_${name}`;
+const DEFAULT_BUDGETS = {
+  Food: 10000,
+  Shopping: 8000,
+  Bills: 7000,
+  Transport: 5000,
+  Entertainment: 4000,
+  Healthcare: 5000
+};
+
+const DEFAULT_GOALS = [
+  { id: id(), name: 'Emergency Fund', target: 200000, saved: 120000, category: 'Safety' },
+  { id: id(), name: 'Laptop', target: 90000, saved: 30000, category: 'Technology' },
+  { id: id(), name: 'Trip Fund', target: 60000, saved: 18000, category: 'Travel' }
+];
+
+function id() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function todayISO() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function monthKey(dateValue) {
+  const d = new Date(dateValue);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function currentMonthKey() {
+  return monthKey(todayISO());
+}
+
+function currentMonthLabel() {
+  return new Intl.DateTimeFormat('en-IN', {
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date());
+}
+
+function formatDate(value) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  }).format(d);
+}
+
+function rupee(n) {
+  return `₹${Number(n || 0).toLocaleString('en-IN', {
+    maximumFractionDigits: 0
+  })}`;
+}
+
+function userDataKey(name) {
+  if (!currentUser) return `finora_${name}`;
   return `finora_user_${currentUser.id}_${name}`;
 }
 
-function getUsers(){
-  return JSON.parse(localStorage.getItem("finora_users") || "{}");
-}
-
-function saveUsers(users){
-  localStorage.setItem("finora_users",JSON.stringify(users));
-}
-
-function loadTransactions(){
-  const saved=localStorage.getItem(userDataKey("transactions"));
-  if(saved){
-    transactions=JSON.parse(saved);
-  }else{
-    transactions=defaults.map(x=>({...x}));
+function getJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
   }
 }
 
-
-/* FORMAT RUPEE */
-
-const rupee=n=>
-"₹"+Number(n).toLocaleString("en-IN");
-
-
-/* TRANSACTION ROWS */
-
-function rows(data){
-
-return data
-.slice()
-.reverse()
-.map(x=>`
-
-<div class="row">
-
-<div>
-
-<b>${x.d}</b>
-
-<div class="muted">
-${x.t}
-</div>
-
-</div>
-
-<div>
-
-<span class="pill">
-${x.c}
-</span>
-
-</div>
-
-<div class="muted">
-${x.date}
-</div>
-
-<div
-class="${x.t==="Income"?"income":"expense"}"
->
-
-${x.t==="Income"?"+":"−"}${rupee(x.a)}
-
-</div>
-
-</div>
-
-`)
-.join("");
-
+function setJSON(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
-
-/* RENDER */
-
-function render(){
-
-let inc=
-transactions
-.filter(x=>x.t==="Income")
-.reduce((s,x)=>s+x.a,0);
-
-let exp=
-transactions
-.filter(x=>x.t==="Expense")
-.reduce((s,x)=>s+x.a,0);
-
-let save=inc-exp;
-
-
-/* METRICS */
-
-income.textContent=rupee(inc);
-
-expenses.textContent=rupee(exp);
-
-savings.textContent=rupee(save);
-
-balance.textContent=
-rupee(
-184500+(inc-75000)-(exp-42350)
-);
-
-
-/* TRANSACTION TABLES */
-
-recentRows.innerHTML=
-rows(transactions.slice(-5));
-
-allRows.innerHTML=
-rows(transactions);
-
-
-/* SAVE */
-
-localStorage.setItem(
-userDataKey("transactions"),
-JSON.stringify(transactions)
-);
-
-
-/* UPDATE CHART */
-
-chart();
-
+function saveState() {
+  setJSON(userDataKey('transactions'), transactions);
+  setJSON(userDataKey('budgets'), budgets);
+  setJSON(userDataKey('goals'), goals);
 }
 
+function seedTransactions() {
+  const y = new Date().getFullYear();
+  const m = String(new Date().getMonth() + 1).padStart(2, '0');
+  const d = day => `${y}-${m}-${String(day).padStart(2, '0')}`;
 
-/* DATA-DRIVEN CHART */
-
-function chart(){
-
-const groups=7;
-
-const incomeValues=
-Array(groups).fill(0);
-
-const expenseValues=
-Array(groups).fill(0);
-
-transactions.forEach(x=>{
-
-if(x.t==="Income"){
-incomeValues[
-Math.floor(Math.random()*groups)
-]+=x.a;
-}else{
-expenseValues[
-Math.floor(Math.random()*groups)
-]+=x.a;
+  return [
+    { id: id(), d: 'Monthly Salary', c: 'Salary', date: d(1), a: 60000, t: 'Income' },
+    { id: id(), d: 'House Rent', c: 'Bills', date: d(2), a: 15000, t: 'Expense' },
+    { id: id(), d: 'Grocery Market', c: 'Food', date: d(4), a: 2850, t: 'Expense' },
+    { id: id(), d: 'Internet Bill', c: 'Bills', date: d(6), a: 999, t: 'Expense' },
+    { id: id(), d: 'Metro Recharge', c: 'Transport', date: d(8), a: 800, t: 'Expense' },
+    { id: id(), d: 'Freelance Project', c: 'Investment', date: d(10), a: 8500, t: 'Income' },
+    { id: id(), d: 'Lunch', c: 'Food', date: d(12), a: 620, t: 'Expense' },
+    { id: id(), d: 'Electricity Bill', c: 'Bills', date: d(15), a: 2140, t: 'Expense' },
+    { id: id(), d: 'Fuel', c: 'Transport', date: d(18), a: 1800, t: 'Expense' },
+    { id: id(), d: 'Movie & Dinner', c: 'Entertainment', date: d(20), a: 1450, t: 'Expense' },
+    { id: id(), d: 'Online Shopping', c: 'Shopping', date: d(22), a: 2499, t: 'Expense' },
+    { id: id(), d: 'Pharmacy', c: 'Healthcare', date: d(24), a: 560, t: 'Expense' }
+  ];
 }
 
-});
+function loadUserData() {
+  transactions = getJSON(userDataKey('transactions'), null);
+  if (!Array.isArray(transactions)) transactions = seedTransactions();
 
+  budgets = getJSON(userDataKey('budgets'), null);
+  if (!budgets || typeof budgets !== 'object') budgets = { ...DEFAULT_BUDGETS };
 
-const max=Math.max(
-...incomeValues,
-...expenseValues,
-1
-);
+  goals = getJSON(userDataKey('goals'), null);
+  if (!Array.isArray(goals)) goals = DEFAULT_GOALS.map(g => ({ ...g, id: id() }));
 
-
-flowChart.innerHTML=
-incomeValues
-.map((v,i)=>{
-
-let ih=
-Math.max(
-4,
-(v/max)*100
-);
-
-let eh=
-Math.max(
-4,
-(expenseValues[i]/max)*100
-);
-
-return `
-
-<div class="bar-group">
-
-<div
-class="bar"
-style="height:${ih}%"
-title="Income ${rupee(v)}"
-></div>
-
-<div
-class="bar exp"
-style="height:${eh}%"
-title="Expense ${rupee(expenseValues[i])}"
-></div>
-
-</div>
-
-`;
-
-})
-.join("");
-
+  saveState();
 }
 
-
-/* NAVIGATION */
-
-document
-.querySelectorAll(".nav button")
-.forEach(b=>{
-
-b.onclick=()=>{
-
-document
-.querySelectorAll(".nav button")
-.forEach(x=>
-x.classList.remove("active")
-);
-
-b.classList.add("active");
-
-document
-.querySelectorAll(".page")
-.forEach(p=>
-p.classList.remove("active")
-);
-
-document
-.getElementById(b.dataset.page)
-.classList.add("active");
-
-};
-
-});
-
-
-/* OPEN MODAL */
-
-function openModal(){
-
-modal.classList.add("show");
-
-date.value=
-new Date()
-.toISOString()
-.slice(0,10);
-
+function getUsers() {
+  return getJSON('finora_users', {});
 }
 
-
-/* CLOSE MODAL */
-
-function closeModal(){
-
-modal.classList.remove("show");
-
+function saveUsers(users) {
+  setJSON('finora_users', users);
 }
 
-
-/* ADD TRANSACTION */
-
-transactionForm.onsubmit=e=>{
-
-e.preventDefault();
-
-transactions.push({
-
-d:desc.value,
-
-c:category.value,
-
-date:
-new Date(date.value)
-.toLocaleDateString(
-"en-US",
-{
-month:"short",
-day:"2-digit",
-year:"numeric"
-}
-),
-
-a:+amount.value,
-
-t:type.value
-
-});
-
-
-render();
-
-closeModal();
-
-e.target.reset();
-
-alert(
-"Transaction added successfully!"
-);
-
-};
-
-
-/* FILTER */
-
-function filterRows(){
-
-let q=
-globalSearch.value.toLowerCase();
-
-let tf=
-typeFilter.value;
-
-let cf=
-catFilter.value;
-
-let f=
-transactions.filter(x=>
-
-(
-!q ||
-`${x.d} ${x.c} ${x.t}`
-.toLowerCase()
-.includes(q)
-)
-
-&&
-
-(
-tf==="All Types" ||
-x.t===tf
-)
-
-&&
-
-(
-cf==="All Categories" ||
-x.c===cf
-)
-
-);
-
-allRows.innerHTML=
-f.length
-?rows(f)
-:'<div class="empty">No matching transactions.</div>';
-
-}
-
-
-globalSearch.oninput=filterRows;
-
-typeFilter.onchange=filterRows;
-
-catFilter.onchange=filterRows;
-
-
-/* ADD GOAL */
-
-function addGoal(){
-
-let n=
-prompt("Goal name:");
-
-if(n){
-
-alert(
-n+" goal created successfully!"
-);
-
-}
-
-}
-
-
-/* SETTINGS */
-
-function saveSettings(){
-
-localStorage.setItem(
-userDataKey("name"),
-profileName.value
-);
-
-localStorage.setItem(
-userDataKey("email"),
-profileEmail.value
-);
-
-localStorage.setItem(
-userDataKey("currency"),
-currency.value
-);
-
-localStorage.setItem(
-userDataKey("theme"),
-theme.value
-);
-
-updateProfileUI();
-
-alert(
-"Settings saved successfully!"
-);
-
-}
-
-
-/* LOAD SETTINGS */
-
-function loadSettings(){
-
-let savedName=
-localStorage.getItem(userDataKey("name"));
-
-let savedEmail=
-localStorage.getItem(userDataKey("email"));
-
-let savedCurrency=
-localStorage.getItem(userDataKey("currency"));
-
-let savedTheme=
-localStorage.getItem(userDataKey("theme"));
-
-if(savedName)
-profileName.value=savedName;
-else if(currentUser)
-profileName.value=currentUser.name;
-
-if(savedEmail)
-profileEmail.value=savedEmail;
-else if(currentUser)
-profileEmail.value=currentUser.email;
-
-if(savedCurrency)
-currency.value=savedCurrency;
-
-if(savedTheme)
-theme.value=savedTheme;
-
-updateProfileUI();
-
-}
-
-
-
-/* AUTHENTICATION */
-
-const authScreen=document.getElementById("authScreen");
-const app=document.getElementById("app");
-const loginTab=document.getElementById("loginTab");
-const registerTab=document.getElementById("registerTab");
-const loginPanel=document.getElementById("loginPanel");
-const registerPanel=document.getElementById("registerPanel");
-const authMessage=document.getElementById("authMessage");
-const loginForm=document.getElementById("loginForm");
-const registerForm=document.getElementById("registerForm");
-const logoutBtn=document.getElementById("logoutBtn");
-
-function setAuthMessage(message,type=""){
-  authMessage.textContent=message;
-  authMessage.className="auth-message"+(type?` ${type}`:"");
-}
-
-function switchAuth(mode){
-  const login=mode==="login";
-
-  loginTab.classList.toggle("active",login);
-  registerTab.classList.toggle("active",!login);
-  loginPanel.style.display=login?"block":"none";
-  registerPanel.style.display=login?"none":"block";
-  setAuthMessage("");
-}
-
-loginTab.onclick=()=>switchAuth("login");
-registerTab.onclick=()=>switchAuth("register");
-
-async function hashPassword(password){
-  if(window.crypto && crypto.subtle){
-    const data=new TextEncoder().encode(password);
-    const buffer=await crypto.subtle.digest("SHA-256",data);
-    return Array.from(new Uint8Array(buffer))
-      .map(b=>b.toString(16).padStart(2,"0"))
-      .join("");
+async function hashPassword(password, salt = null) {
+  if (window.crypto?.subtle) {
+    const saltValue = salt || crypto.getRandomValues(new Uint8Array(16));
+    const saltBytes = typeof saltValue === 'string' ? hexToBytes(saltValue) : saltValue;
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(password),
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+
+    const bits = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: saltBytes,
+        iterations: 120000,
+        hash: 'SHA-256'
+      },
+      key,
+      256
+    );
+
+    return {
+      hash: bytesToHex(new Uint8Array(bits)),
+      salt: bytesToHex(saltBytes)
+    };
   }
 
-  /* Local demo fallback for older browsers. */
-  let hash=0;
-  for(let i=0;i<password.length;i++){
-    hash=((hash<<5)-hash)+password.charCodeAt(i);
-    hash|=0;
+  let hash = 0;
+  for (let i = 0; i < password.length; i++) {
+    hash = ((hash << 5) - hash) + password.charCodeAt(i);
+    hash |= 0;
   }
-  return String(hash);
+  return { hash: String(hash), salt: 'fallback' };
 }
 
-function updateProfileUI(){
-  if(!currentUser) return;
-
-  const savedName=localStorage.getItem(userDataKey("name"));
-  const displayName=savedName || currentUser.name || "User";
-  const firstInitial=displayName.trim().charAt(0).toUpperCase() || "U";
-
-  profileDisplayName.textContent=displayName;
-  profileAvatar.textContent=firstInitial;
-  dashboardGreeting.textContent=`Good evening, ${displayName} 👋`;
+function bytesToHex(bytes) {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function loginUser(email,password){
-  const users=getUsers();
-  const key=email.trim().toLowerCase();
-  const user=users[key];
+function hexToBytes(hex) {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+  return out;
+}
 
-  if(!user){
-    setAuthMessage("No account found for this email.","error");
-    return;
+function setAuthMessage(message, kind = '') {
+  authMessage.textContent = message;
+  authMessage.className = `auth-message${kind ? ` ${kind}` : ''}`;
+}
+
+function switchAuth(mode) {
+  const login = mode === 'login';
+  loginTab.classList.toggle('active', login);
+  registerTab.classList.toggle('active', !login);
+  loginPanel.style.display = login ? 'block' : 'none';
+  registerPanel.style.display = login ? 'none' : 'block';
+  setAuthMessage('');
+}
+
+function firstName(name) {
+  return String(name || 'User').trim().split(/\s+/)[0] || 'User';
+}
+
+function updateProfileUI() {
+  if (!currentUser) return;
+
+  const savedName = localStorage.getItem(userDataKey('name'));
+  const savedEmail = localStorage.getItem(userDataKey('email'));
+  const displayName = savedName || currentUser.name || 'User';
+
+  profileDisplayName.textContent = displayName;
+  profileAvatar.textContent = displayName.charAt(0).toUpperCase();
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  dashboardGreeting.textContent = `${greeting}, ${firstName(displayName)} 👋`;
+
+  if (dashboardSubtitle) {
+    dashboardSubtitle.textContent = `Here's your financial overview for ${currentMonthLabel()}.`;
   }
 
-  const passwordHash=await hashPassword(password);
+  if (profileName) profileName.value = displayName;
+  if (profileEmail) profileEmail.value = savedEmail || currentUser.email || '';
+}
 
-  if(user.passwordHash!==passwordHash){
-    setAuthMessage("Incorrect password.","error");
-    return;
+function getCurrentMonthTransactions() {
+  const key = currentMonthKey();
+  return transactions.filter(x => monthKey(x.date) === key);
+}
+
+function totals(list) {
+  const income = list.filter(x => x.t === 'Income').reduce((s, x) => s + Number(x.a), 0);
+  const expense = list.filter(x => x.t === 'Expense').reduce((s, x) => s + Number(x.a), 0);
+  return { income, expense, savings: income - expense };
+}
+
+function renderMetrics() {
+  const monthTx = getCurrentMonthTransactions();
+  const monthTotals = totals(monthTx);
+  const allTotals = totals(transactions);
+
+  const openingBalance = Number(localStorage.getItem(userDataKey('openingBalance')) || 150000);
+  const balance = openingBalance + allTotals.income - allTotals.expense;
+
+  incomeEl.textContent = rupee(monthTotals.income);
+  expensesEl.textContent = rupee(monthTotals.expense);
+  savingsEl.textContent = rupee(monthTotals.savings);
+  balanceEl.textContent = rupee(balance);
+
+  const savingsRate = monthTotals.income ? (monthTotals.savings / monthTotals.income) * 100 : 0;
+  const largest = monthTx.filter(x => x.t === 'Expense').sort((a, b) => b.a - a.a)[0];
+
+  const analyticsCards = document.querySelectorAll('#analytics .cards .card');
+  if (analyticsCards.length >= 4) {
+    analyticsCards[0].querySelector('.metric').textContent = `${savingsRate.toFixed(1)}%`;
+    analyticsCards[0].querySelector('.muted').textContent = 'Current-month savings ratio';
+    analyticsCards[1].querySelector('.metric').textContent = rupee(monthTotals.expense / Math.max(new Date().getDate(), 1));
+    analyticsCards[1].querySelector('.muted').textContent = `${currentMonthLabel()} average`;
+    analyticsCards[2].querySelector('.metric').textContent = largest ? rupee(largest.a) : '₹0';
+    analyticsCards[2].querySelector('.muted').textContent = largest ? largest.d : 'No expense yet';
+    analyticsCards[3].querySelector('.metric').textContent = String(monthTx.length);
+    analyticsCards[3].querySelector('.muted').textContent = 'This month';
+  }
+}
+
+function transactionHTML(x) {
+  const deleteButton = `
+    <button type="button" class="logout-btn delete-transaction" data-id="${x.id}" title="Delete transaction" style="margin-left:8px;padding:6px 8px">×</button>
+  `;
+
+  return `
+    <div class="row">
+      <div>
+        <b>${escapeHTML(x.d)}</b>
+        <div class="muted">${escapeHTML(x.t)}</div>
+      </div>
+      <div><span class="pill">${escapeHTML(x.c)}</span></div>
+      <div class="muted">${escapeHTML(formatDate(x.date))}</div>
+      <div class="${x.t === 'Income' ? 'income' : 'expense'}" style="display:flex;align-items:center;justify-content:flex-end;gap:4px">
+        <span>${x.t === 'Income' ? '+' : '−'}${rupee(x.a)}</span>
+        ${deleteButton}
+      </div>
+    </div>
+  `;
+}
+
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function sortedTransactions(list) {
+  return [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function renderTransactionLists(list = transactions) {
+  const sorted = sortedTransactions(list);
+  recentRows.innerHTML = sorted.slice(0, 5).map(transactionHTML).join('') || '<div class="empty">No transactions yet.</div>';
+  allRows.innerHTML = sorted.map(transactionHTML).join('') || '<div class="empty">No transactions yet.</div>';
+}
+
+function renderBudgets() {
+  document.querySelectorAll('.budget').forEach(block => {
+    const label = block.querySelector('.budget-head b');
+    const span = block.querySelector('.budget-head span');
+    const progress = block.querySelector('.progress i');
+    if (!label || !span || !progress) return;
+
+    const name = label.textContent.trim();
+    if (!(name in budgets)) return;
+
+    const spent = getCurrentMonthTransactions()
+      .filter(x => x.t === 'Expense' && x.c === name)
+      .reduce((sum, x) => sum + Number(x.a), 0);
+
+    const limit = Number(budgets[name]) || 0;
+    const pct = limit ? Math.min((spent / limit) * 100, 100) : 0;
+
+    span.textContent = `${rupee(spent)} / ${rupee(limit)}`;
+    progress.style.width = `${pct}%`;
+  });
+
+  const budgetCards = document.querySelectorAll('#budgets .cards .card');
+  if (budgetCards.length >= 3) {
+    const totalBudget = Object.values(budgets).reduce((s, n) => s + Number(n), 0);
+    const spent = getCurrentMonthTransactions()
+      .filter(x => x.t === 'Expense')
+      .reduce((s, x) => s + Number(x.a), 0);
+    const remaining = Math.max(totalBudget - spent, 0);
+    const utilization = totalBudget ? (spent / totalBudget) * 100 : 0;
+
+    budgetCards[0].querySelector('.metric').textContent = rupee(totalBudget);
+    budgetCards[0].querySelector('.muted').textContent = currentMonthLabel();
+    budgetCards[1].querySelector('.metric').textContent = rupee(spent);
+    budgetCards[1].querySelector('.muted').textContent = `${utilization.toFixed(1)}% utilized`;
+    budgetCards[2].querySelector('.metric').textContent = rupee(remaining);
+    budgetCards[2].querySelector('.muted').textContent = 'Available to spend';
+  }
+}
+
+function renderGoals() {
+  const cards = document.querySelector('#goals .cards');
+  if (!cards) return;
+
+  cards.innerHTML = goals.map(g => {
+    const pct = g.target > 0 ? Math.min((g.saved / g.target) * 100, 100) : 0;
+    return `
+      <div class="card goal-card">
+        <div class="metric-top">
+          <b>${escapeHTML(g.name)}</b>
+          <b>${pct.toFixed(0)}%</b>
+        </div>
+        <div class="metric">${rupee(g.saved)} <span class="muted">/ ${rupee(g.target)}</span></div>
+        <div class="progress"><i style="width:${pct}%"></i></div>
+        <div class="muted">${escapeHTML(g.category || 'General')}</div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn secondary goal-add" data-id="${g.id}" type="button">Add savings</button>
+          <button class="logout-btn goal-delete" data-id="${g.id}" type="button" style="margin-left:0">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div class="empty">No savings goals yet.</div>';
+}
+
+function renderAnalyticsCategorySpend() {
+  const names = ['Shopping', 'Food', 'Bills', 'Transport'];
+  const blocks = document.querySelectorAll('#analytics .grid2 .card:first-child .budget');
+  names.forEach((name, index) => {
+    const block = blocks[index];
+    if (!block) return;
+    const spent = getCurrentMonthTransactions()
+      .filter(x => x.t === 'Expense' && x.c === name)
+      .reduce((s, x) => s + Number(x.a), 0);
+    const label = block.querySelector('.budget-head b');
+    const span = block.querySelector('.budget-head span');
+    const bar = block.querySelector('.progress i');
+    if (label) label.textContent = name;
+    if (span) span.textContent = rupee(spent);
+    if (bar) {
+      const max = Math.max(...names.map(n => getCurrentMonthTransactions().filter(x => x.t === 'Expense' && x.c === n).reduce((s, x) => s + Number(x.a), 0)), 1);
+      bar.style.width = `${(spent / max) * 100}%`;
+    }
+  });
+}
+
+function renderCashFlowChart() {
+  const end = new Date();
+  const buckets = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(end);
+    date.setDate(end.getDate() - i);
+    const key = date.toISOString().slice(0, 10);
+    buckets.push({
+      key,
+      label: new Intl.DateTimeFormat('en-IN', { weekday: 'short' }).format(date),
+      income: 0,
+      expense: 0
+    });
   }
 
-  currentUser=user;
-  localStorage.setItem("finora_session",user.id);
+  for (const tx of transactions) {
+    const item = buckets.find(b => b.key === tx.date);
+    if (!item) continue;
+    if (tx.t === 'Income') item.income += Number(tx.a);
+    else item.expense += Number(tx.a);
+  }
 
-  loadTransactions();
+  const max = Math.max(...buckets.flatMap(b => [b.income, b.expense]), 1);
+
+  flowChart.innerHTML = buckets.map(b => `
+    <div class="bar-group" title="${b.label}: ${rupee(b.income)} income / ${rupee(b.expense)} expense">
+      <div class="bar" style="height:${Math.max(4, (b.income / max) * 100)}%" title="Income ${rupee(b.income)}"></div>
+      <div class="bar exp" style="height:${Math.max(4, (b.expense / max) * 100)}%" title="Expense ${rupee(b.expense)}"></div>
+    </div>
+  `).join('');
+}
+
+function render() {
+  updateProfileUI();
+  renderMetrics();
+  renderTransactionLists();
+  renderBudgets();
+  renderGoals();
+  renderAnalyticsCategorySpend();
+  renderCashFlowChart();
+  saveState();
+}
+
+function filterRows() {
+  const q = globalSearch.value.trim().toLowerCase();
+  const tf = typeFilter.value;
+  const cf = catFilter.value;
+
+  const filtered = transactions.filter(x => {
+    const matchesQuery = !q || `${x.d} ${x.c} ${x.t} ${x.date}`.toLowerCase().includes(q);
+    const matchesType = tf === 'All Types' || x.t === tf;
+    const matchesCategory = cf === 'All Categories' || x.c === cf;
+    return matchesQuery && matchesType && matchesCategory;
+  });
+
+  allRows.innerHTML = filtered.length
+    ? sortedTransactions(filtered).map(transactionHTML).join('')
+    : '<div class="empty">No matching transactions.</div>';
+}
+
+function openModal() {
+  modal.classList.add('show');
+  dateInput.value = todayISO();
+  setTimeout(() => desc.focus(), 50);
+}
+
+function closeModal() {
+  modal.classList.remove('show');
+}
+
+function saveSettings() {
+  const name = profileName.value.trim() || currentUser.name;
+  const email = profileEmail.value.trim() || currentUser.email;
+
+  localStorage.setItem(userDataKey('name'), name);
+  localStorage.setItem(userDataKey('email'), email);
+  localStorage.setItem(userDataKey('currency'), currency.value);
+  localStorage.setItem(userDataKey('theme'), theme.value);
+
+  applyTheme();
+  updateProfileUI();
+  alert('Settings saved successfully!');
+}
+
+function loadSettings() {
+  const savedName = localStorage.getItem(userDataKey('name'));
+  const savedEmail = localStorage.getItem(userDataKey('email'));
+  const savedCurrency = localStorage.getItem(userDataKey('currency'));
+  const savedTheme = localStorage.getItem(userDataKey('theme'));
+
+  if (savedName && profileName) profileName.value = savedName;
+  else if (profileName) profileName.value = currentUser?.name || '';
+
+  if (savedEmail && profileEmail) profileEmail.value = savedEmail;
+  else if (profileEmail) profileEmail.value = currentUser?.email || '';
+
+  if (savedCurrency) currency.value = savedCurrency;
+  if (savedTheme) theme.value = savedTheme;
+
+  applyTheme();
+}
+
+function applyTheme() {
+  const dark = theme?.value === 'Dark';
+  document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+
+  if (dark) {
+    document.body.style.background = '#0b1020';
+    document.body.style.color = '#edf2f7';
+    document.querySelectorAll('.card,.table,.modal-box,.auth-shell').forEach(el => {
+      el.style.background = 'rgba(20,26,45,.92)';
+      el.style.borderColor = 'rgba(255,255,255,.08)';
+      el.style.color = '#edf2f7';
+    });
+    document.querySelectorAll('.control,.field input,.field select,.auth-field input,.search').forEach(el => {
+      el.style.background = '#151c2f';
+      el.style.color = '#edf2f7';
+      el.style.borderColor = '#2d3650';
+    });
+  } else {
+    document.body.style.background = '';
+    document.body.style.color = '';
+    document.querySelectorAll('.card,.table,.modal-box,.auth-shell').forEach(el => {
+      el.style.background = '';
+      el.style.borderColor = '';
+      el.style.color = '';
+    });
+    document.querySelectorAll('.control,.field input,.field select,.auth-field input,.search').forEach(el => {
+      el.style.background = '';
+      el.style.color = '';
+      el.style.borderColor = '';
+    });
+  }
+}
+
+function addGoal() {
+  const name = prompt('Goal name:');
+  if (!name?.trim()) return;
+
+  const target = Number(prompt('Target amount (₹):', '50000'));
+  if (!Number.isFinite(target) || target <= 0) return alert('Please enter a valid target amount.');
+
+  const saved = Number(prompt('Already saved (₹):', '0'));
+  if (!Number.isFinite(saved) || saved < 0) return alert('Please enter a valid saved amount.');
+
+  const goalCategory = prompt('Category:', 'General') || 'General';
+
+  goals.push({
+    id: id(),
+    name: name.trim(),
+    target,
+    saved: Math.min(saved, target),
+    category: goalCategory.trim() || 'General'
+  });
+
+  saveState();
+  renderGoals();
+}
+
+function exportCSV() {
+  const headers = ['Description', 'Category', 'Date', 'Amount', 'Type'];
+  const lines = [headers.join(',')];
+  sortedTransactions(transactions).forEach(x => {
+    lines.push([
+      csv(x.d),
+      csv(x.c),
+      csv(formatDate(x.date)),
+      Number(x.a),
+      csv(x.t)
+    ].join(','));
+  });
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `finora-transactions-${todayISO()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function csv(value) {
+  const text = String(value ?? '');
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function addExportButton() {
+  const toolbar = document.querySelector('#transactions .toolbar');
+  if (!toolbar || toolbar.querySelector('.export-csv')) return;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn secondary export-csv';
+  button.textContent = 'Export CSV';
+  button.onclick = exportCSV;
+
+  toolbar.insertBefore(button, toolbar.lastElementChild || null);
+}
+
+async function loginUser(email, password) {
+  const users = getUsers();
+  const key = email.trim().toLowerCase();
+  const user = users[key];
+
+  if (!user) return setAuthMessage('No account found for this email.', 'error');
+
+  const result = await hashPassword(password, user.salt);
+  if (result.hash !== user.passwordHash) {
+    return setAuthMessage('Incorrect password.', 'error');
+  }
+
+  currentUser = user;
+  localStorage.setItem('finora_session', user.id);
+
+  loadUserData();
   loadSettings();
   render();
+  addExportButton();
 
-  app.classList.remove("auth-locked");
-  authScreen.style.display="none";
-  setAuthMessage("");
+  app.classList.remove('auth-locked');
+  authScreen.style.display = 'none';
+  setAuthMessage('');
 }
 
-loginForm.onsubmit=async e=>{
+loginForm.onsubmit = async e => {
   e.preventDefault();
-  const email=loginEmail.value.trim();
-  const password=loginPassword.value;
-
-  if(!email || !password){
-    setAuthMessage("Enter your email and password.","error");
-    return;
-  }
-
-  await loginUser(email,password);
+  await loginUser(loginEmail.value, loginPassword.value);
 };
 
-registerForm.onsubmit=async e=>{
+registerForm.onsubmit = async e => {
   e.preventDefault();
 
-  const name=registerName.value.trim();
-  const email=registerEmail.value.trim().toLowerCase();
-  const password=registerPassword.value;
-  const confirm=registerConfirm.value;
+  const name = registerName.value.trim();
+  const email = registerEmail.value.trim().toLowerCase();
+  const password = registerPassword.value;
+  const confirm = registerConfirm.value;
 
-  if(password.length<6){
-    setAuthMessage("Password must contain at least 6 characters.","error");
+  if (!name) return setAuthMessage('Enter your full name.', 'error');
+  if (password.length < 6) return setAuthMessage('Password must contain at least 6 characters.', 'error');
+  if (password !== confirm) return setAuthMessage('Passwords do not match.', 'error');
+
+  const users = getUsers();
+  if (users[email]) {
+    setAuthMessage('An account with this email already exists.', 'error');
+    switchAuth('login');
+    loginEmail.value = email;
     return;
   }
 
-  if(password!==confirm){
-    setAuthMessage("Passwords do not match.","error");
-    return;
-  }
-
-  const users=getUsers();
-
-  if(users[email]){
-    setAuthMessage("An account with this email already exists.","error");
-    switchAuth("login");
-    loginEmail.value=email;
-    return;
-  }
-
-  const user={
-    id:crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`,
+  const hashed = await hashPassword(password);
+  const user = {
+    id: id(),
     name,
     email,
-    passwordHash:await hashPassword(password)
+    passwordHash: hashed.hash,
+    salt: hashed.salt
   };
 
-  users[email]=user;
+  users[email] = user;
   saveUsers(users);
 
-  currentUser=user;
-  localStorage.setItem("finora_session",user.id);
+  currentUser = user;
+  localStorage.setItem('finora_session', user.id);
+  localStorage.setItem(userDataKey('name'), name);
+  localStorage.setItem(userDataKey('email'), email);
+  localStorage.setItem(userDataKey('openingBalance'), '150000');
 
-  /* Start this user with a private copy of the demo data. */
-  loadTransactions();
-  localStorage.setItem(userDataKey("name"),name);
-  localStorage.setItem(userDataKey("email"),email);
+  loadUserData();
   loadSettings();
   render();
+  addExportButton();
 
-  app.classList.remove("auth-locked");
-  authScreen.style.display="none";
-  setAuthMessage("");
-
+  app.classList.remove('auth-locked');
+  authScreen.style.display = 'none';
   registerForm.reset();
+  setAuthMessage('');
 };
 
-logoutBtn.onclick=()=>{
-  localStorage.removeItem("finora_session");
-  currentUser=null;
-  transactions=[];
-  app.classList.add("auth-locked");
-  authScreen.style.display="flex";
-  switchAuth("login");
+logoutBtn.onclick = () => {
+  localStorage.removeItem('finora_session');
+  currentUser = null;
+  transactions = [];
+  budgets = {};
+  goals = [];
+  app.classList.add('auth-locked');
+  authScreen.style.display = 'flex';
+  switchAuth('login');
   loginForm.reset();
   registerForm.reset();
-  setAuthMessage("You have been logged out.","success");
+  setAuthMessage('You have been logged out.', 'success');
 };
 
-function restoreSession(){
-  const sessionId=localStorage.getItem("finora_session");
-  const users=getUsers();
+function restoreSession() {
+  const sessionId = localStorage.getItem('finora_session');
+  const users = getUsers();
+  currentUser = Object.values(users).find(u => u.id === sessionId) || null;
 
-  currentUser=Object.values(users).find(u=>u.id===sessionId) || null;
-
-  if(!currentUser){
-    localStorage.removeItem("finora_session");
-    app.classList.add("auth-locked");
-    authScreen.style.display="flex";
+  if (!currentUser) {
+    app.classList.add('auth-locked');
+    authScreen.style.display = 'flex';
     return;
   }
 
-  loadTransactions();
+  loadUserData();
   loadSettings();
-  updateProfileUI();
-
-  app.classList.remove("auth-locked");
-  authScreen.style.display="none";
+  app.classList.remove('auth-locked');
+  authScreen.style.display = 'none';
   render();
+  addExportButton();
 }
 
+/* Navigation */
+document.querySelectorAll('.nav button').forEach(button => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
+    button.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const page = $(button.dataset.page);
+    if (page) page.classList.add('active');
+    if (button.dataset.page === 'budgets') renderBudgets();
+    if (button.dataset.page === 'analytics') renderAnalyticsCategorySpend();
+    if (button.dataset.page === 'goals') renderGoals();
+  });
+});
 
+/* Authentication tabs */
+loginTab.onclick = () => switchAuth('login');
+registerTab.onclick = () => switchAuth('register');
 
-/* CLOSE MODAL WHEN CLICKING OUTSIDE */
+/* Transaction form */
+transactionForm.onsubmit = e => {
+  e.preventDefault();
 
-modal.onclick=e=>{
+  const value = Number(amount.value);
+  if (!desc.value.trim() || !Number.isFinite(value) || value <= 0 || !dateInput.value) {
+    return alert('Please enter valid transaction details.');
+  }
 
-if(e.target===modal){
-closeModal();
-}
+  transactions.push({
+    id: id(),
+    d: desc.value.trim(),
+    c: category.value,
+    date: dateInput.value,
+    a: value,
+    t: type.value
+  });
 
+  saveState();
+  render();
+  filterRows();
+  closeModal();
+  transactionForm.reset();
+  alert('Transaction added successfully.');
 };
 
+/* Search + filters */
+globalSearch.oninput = filterRows;
+typeFilter.onchange = filterRows;
+catFilter.onchange = filterRows;
 
-/* ESC KEY */
+/* Delete transactions / goal actions */
+document.addEventListener('click', e => {
+  const txDelete = e.target.closest('.delete-transaction');
+  if (txDelete) {
+    const txId = txDelete.dataset.id;
+    const tx = transactions.find(x => x.id === txId);
+    if (!tx) return;
+    if (!confirm(`Delete "${tx.d}" (${rupee(tx.a)})?`)) return;
+    transactions = transactions.filter(x => x.id !== txId);
+    saveState();
+    render();
+    filterRows();
+    return;
+  }
 
-document.addEventListener(
-"keydown",
-e=>{
+  const goalAdd = e.target.closest('.goal-add');
+  if (goalAdd) {
+    const goal = goals.find(g => g.id === goalAdd.dataset.id);
+    if (!goal) return;
+    const add = Number(prompt(`Add savings to ${goal.name}:`, '1000'));
+    if (!Number.isFinite(add) || add <= 0) return;
+    goal.saved = Math.min(goal.target, goal.saved + add);
+    saveState();
+    renderGoals();
+    return;
+  }
 
-if(e.key==="Escape"){
-closeModal();
-}
+  const goalDelete = e.target.closest('.goal-delete');
+  if (goalDelete) {
+    const goal = goals.find(g => g.id === goalDelete.dataset.id);
+    if (!goal) return;
+    if (!confirm(`Delete goal "${goal.name}"?`)) return;
+    goals = goals.filter(g => g.id !== goal.id);
+    saveState();
+    renderGoals();
+  }
+});
 
-}
-);
+/* Modal */
+modal.onclick = e => {
+  if (e.target === modal) closeModal();
+};
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
 
+/* Make inline buttons work from existing markup */
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.addGoal = addGoal;
+window.saveSettings = saveSettings;
 
-/* INITIALIZE */
-
+/* Initialize */
 restoreSession();
 
 </script>
