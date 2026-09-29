@@ -13,7 +13,7 @@
 
 ---
 
-## 🌐 Overview
+🌐 Overview
 
 **Finora** is a frontend personal finance management application designed with the interaction style of a modern personal portfolio.
 
