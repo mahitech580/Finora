@@ -17,12 +17,15 @@ test("CSV cells quote normal content and escape embedded quotes", () => {
   const helper = appScript.match(/function csvCell\(value\)\s*\{[\s\S]*?\n\}/);
   assert.ok(helper, "csvCell helper should exist");
   const context = {};
-  vm.runInNewContext(
-    helper[0] + '\nresult = [csvCell("Groceries"), csvCell(\\'A "quoted" item\\')];',
-    context,
-  );
+  const command = helper[0] +
+    "\nresult = [csvCell('Groceries'), csvCell('A ' + String.fromCharCode(34) + 'quoted' + String.fromCharCode(34) + ' item')];";
+  vm.runInNewContext(command, context);
 
-  assert.deepEqual(Array.from(context.result), ['"Groceries"', '"A ""quoted"" item"']);
+  const quote = String.fromCharCode(34);
+  assert.deepEqual(Array.from(context.result), [
+    quote + "Groceries" + quote,
+    quote + "A " + quote + quote + "quoted" + quote + quote + " item" + quote,
+  ]);
 });
 
 test("CSV cells neutralize formula-leading text, including leading whitespace", () => {
@@ -30,13 +33,14 @@ test("CSV cells neutralize formula-leading text, including leading whitespace", 
   assert.ok(helper, "csvCell helper should exist");
   const context = {};
   vm.runInNewContext(
-    helper[0] + '\nresult = [csvCell("=1+1"), csvCell("  @SUM(A1:A2)"), csvCell("-cmd|/C calc")];',
+    helper[0] + "\nresult = [csvCell('=1+1'), csvCell('  @SUM(A1:A2)'), csvCell('-cmd|/C calc')];",
     context,
   );
 
+  const quote = String.fromCharCode(34);
   assert.deepEqual(Array.from(context.result), [
-    "\\"'=1+1\\"",
-    "\\"'  @SUM(A1:A2)\\"",
-    "\\"'-cmd|/C calc\\"",
+    quote + "'=1+1" + quote,
+    quote + "'  @SUM(A1:A2)" + quote,
+    quote + "'-cmd|/C calc" + quote,
   ]);
 });
