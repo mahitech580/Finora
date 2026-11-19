@@ -3320,6 +3320,22 @@ function escapeHTML(value){
     .replaceAll("'","&#039;");
 }
 
+// Protect spreadsheet applications from evaluating user-controlled text as formulas.
+function csvCell(value){
+
+  const text =
+    String(value ?? "");
+
+  const safe =
+    /^[\\u0000-\\u0020]*[=+\\-@]/.test(text)
+      ? "'" + text
+      : text;
+
+  return "\"" +
+    safe.replaceAll('"','""') +
+    "\"";
+}
+
 function slug(value){
 
   return String(value)
@@ -4870,29 +4886,14 @@ function exportCSV(){
       tx=>{
 
         const row = [
+          csvCell(tx.d),
+          csvCell(tx.c),
+          csvCell(tx.date),
+          csvCell(Number(tx.a)),
+          csvCell(tx.t)
+        ];
 
-          tx.d,
-
-          tx.c,
-
-          tx.date,
-
-          Number(tx.a),
-
-          tx.t
-
-        ].map(
-          value =>
-            `"${String(value)
-              .replaceAll(
-                '"',
-                '""'
-              )}"`
-        );
-
-        lines.push(
-          row.join(",")
-        );
+        lines.push(row.join(","));
       }
     );
 
