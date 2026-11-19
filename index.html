@@ -3327,7 +3327,7 @@ function csvCell(value){
     String(value ?? "");
 
   const safe =
-    /^[\\u0000-\\u0020]*[=+\\-@]/.test(text)
+    /^[\u0000-\u0020]*[=+\-@]/.test(text)
       ? "'" + text
       : text;
 
