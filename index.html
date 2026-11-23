@@ -3351,18 +3351,40 @@ function slug(value){
 
 function saveState(){
 
-  localStorage.setItem(
-    STORE_KEY,
-    JSON.stringify(state)
-  );
+  try{
+
+    localStorage.setItem(
+      STORE_KEY,
+      JSON.stringify(state)
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Finora storage write failed:",
+      error
+    );
+  }
 }
 
 function loadState(){
 
-  const saved =
-    localStorage.getItem(
-      STORE_KEY
+  let saved = null;
+
+  try{
+
+    saved =
+      localStorage.getItem(
+        STORE_KEY
+      );
+
+  }catch(error){
+
+    console.warn(
+      "Finora storage read failed:",
+      error
     );
+  }
 
   if(saved){
 
