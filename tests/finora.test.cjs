@@ -84,7 +84,7 @@ test("loading remains usable when browser storage reads are blocked", () => {
 
   assert.equal(context.state.transactions.length, 1);
   assert.deepEqual(Array.from(context.state.goals, goal => goal.name), ["Emergency"]);
-  assert.equal(warnings.length, 1);
+  assert.equal(warnings.length, 2);
 });
 
 test("saving does not crash when browser storage writes are blocked", () => {
