@@ -80,7 +80,7 @@ test("loading remains usable when browser storage reads are blocked", () => {
     },
   };
 
-  vm.runInNewContext(extractFunction("loadState") + "\nloadState();", context);
+  vm.runInNewContext(extractFunction("saveState") + "\n" + extractFunction("loadState") + "\nloadState();", context);
 
   assert.equal(context.state.transactions.length, 1);
   assert.deepEqual(Array.from(context.state.goals, goal => goal.name), ["Emergency"]);
